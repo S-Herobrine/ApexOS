@@ -1,0 +1,9 @@
+# SatasOS Web Browsers (Selectable in installer)
+google-chrome-stable
+firefox
+microsoft-edge-stable
+opera-stable
+ca-certificates
+curl
+wget
+gnupg

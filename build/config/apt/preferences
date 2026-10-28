@@ -1,0 +1,19 @@
+Package: *
+Pin: release o=SatasOS
+Pin-Priority: 1001
+
+Package: waydroid*
+Pin: origin repo.waydro.id
+Pin-Priority: 900
+
+Package: google-chrome*
+Pin: origin dl.google.com
+Pin-Priority: 900
+
+Package: microsoft-edge*
+Pin: origin packages.microsoft.com
+Pin-Priority: 900
+
+Package: opera*
+Pin: origin deb.opera.com
+Pin-Priority: 900

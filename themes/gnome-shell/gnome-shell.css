@@ -1,0 +1,121 @@
+/* ApexOS GNOME Shell Theme (Purple Obsidian) */
+
+stage {
+    font-family: Inter, Roboto, sans-serif;
+    font-size: 11pt;
+    color: #E8E0F0;
+}
+
+/* 1. Bottom Centered Taskbar Panel */
+#panel {
+    background-color: rgba(30, 27, 46, 0.92);
+    font-weight: 500;
+    height: 48px;
+    border-top: 1px solid rgba(124, 58, 237, 0.3);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.35);
+}
+
+#panel .panel-button {
+    font-weight: 600;
+    color: #E8E0F0;
+    padding: 0 12px;
+    border-radius: 8px;
+    transition-duration: 150ms;
+}
+
+#panel .panel-button:hover {
+    background-color: rgba(124, 58, 237, 0.25);
+    color: #FFFFFF;
+}
+
+#panel .panel-button:active {
+    background-color: #7C3AED;
+    color: #FFFFFF;
+}
+
+/* 2. Start Menu & Popups */
+.popup-menu {
+    background-color: #1E1B2E;
+    color: #E8E0F0;
+    border: 1px solid rgba(124, 58, 237, 0.35);
+    border-radius: 14px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+    padding: 8px;
+}
+
+.popup-menu-item {
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 8px;
+    color: #E8E0F0;
+}
+
+.popup-menu-item:hover {
+    background-color: #7C3AED;
+    color: #FFFFFF;
+}
+
+/* 3. Android Quick Settings Notification Shade */
+.aggregate-menu {
+    min-width: 380px;
+    padding: 14px;
+}
+
+.quick-toggle-button {
+    background-color: #2D2640;
+    border-radius: 20px;
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    min-height: 44px;
+    padding: 6px 14px;
+    color: #E8E0F0;
+}
+
+.quick-toggle-button:checked {
+    background-color: #7C3AED;
+    color: #FFFFFF;
+}
+
+/* Sliders */
+.slider {
+    height: 18px;
+    border-radius: 9px;
+    color: #7C3AED;
+    background-color: #362E50;
+}
+
+/* 4. Windows Snapping Preview */
+.tile-preview {
+    background-color: rgba(124, 58, 237, 0.3);
+    border: 2px solid #7C3AED;
+    border-radius: 12px;
+}
+
+/* 5. Notifications */
+.message-list {
+    background-color: #1E1B2E;
+    border-radius: 12px;
+}
+
+.message {
+    background-color: #2D2640;
+    border-radius: 10px;
+    border: 1px solid rgba(124, 58, 237, 0.15);
+    margin-bottom: 6px;
+    padding: 10px;
+}
+
+/* 6. Lock Screen */
+.lock-dialog {
+    background-color: rgba(15, 12, 24, 0.95);
+}
+
+.unlock-dialog-clock-time {
+    font-size: 64pt;
+    font-weight: 800;
+    color: #FFFFFF;
+}
+
+.unlock-dialog-clock-date {
+    font-size: 16pt;
+    color: #DDD6FE;
+}

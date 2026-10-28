@@ -1,0 +1,34 @@
+# ApexOS Low-End PC Edition Curated Package List
+# Optimized for 4GB RAM, Low CPU, and 14-16GB Storage Systems
+linux-generic
+systemd-sysv
+zram-tools
+mutter
+gnome-shell
+gnome-control-center
+pipewire
+pipewire-pulse
+wireplumber
+mesa-vulkan-drivers
+libgl1-mesa-dri
+xdg-user-dirs
+xdg-utils
+papirus-icon-theme
+fonts-inter
+fonts-jetbrains-mono
+file-roller
+gnome-calculator
+gnome-text-editor
+gnome-system-monitor
+evince
+vlc
+firefox
+waydroid
+lxc
+python3-gbinder
+calamares
+casper
+gzip
+tar
+curl
+wget

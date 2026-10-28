@@ -1,0 +1,32 @@
+---
+componentName:  apexos
+welcomeStyleCalamares: true
+welcomeExpandingLogo: true
+windowExpanding: normal
+windowSize: 800px,520px
+windowPlacement: center
+
+strings:
+    productName:         ApexOS
+    version:             1.0 (LTS)
+    shortVersion:        1.0
+    versionedName:       ApexOS 1.0
+    shortVersionedName:  ApexOS 1.0
+    bootloaderEntryName: ApexOS
+    productUrl:          https://apexos.org
+    supportUrl:          https://apexos.org/support
+    knownIssuesUrl:      https://apexos.org/issues
+    releaseNotesUrl:     https://apexos.org/release-notes
+
+images:
+    productLogo:         "logo.svg"
+    productIcon:         "logo.svg"
+    productWelcome:      "welcome.png"
+
+slideshow:               "show.qml"
+
+style:
+   SidebarBackground:    "#1E1B2E"
+   SidebarText:          "#E8E0F0"
+   SidebarTextCurrent:   "#FFFFFF"
+   SidebarBackgroundCurrent: "#7C3AED"

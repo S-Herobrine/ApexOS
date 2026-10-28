@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Android Subsystem
+GenericName=Android Environment
+Comment=Start or stop the SatasOS Android Waydroid Subsystem
+Exec=waydroid session start
+Icon=android
+Terminal=false
+Type=Application
+Categories=System;Utility;Android;
+Keywords=android;apk;google;playstore;waydroid;
+StartupNotify=true

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=ApexOS Widgets
+GenericName=Desktop Widgets
+Comment=Rainmeter-like lightweight desktop gadgets for ApexOS
+Exec=python3 /usr/local/bin/apexos-widgets.py
+Icon=preferences-desktop-wallpaper
+Terminal=false
+Type=Application
+Categories=Utility;DesktopSettings;GTK;
+Keywords=widget;gadget;rainmeter;clock;cpu;ram;stats;
+StartupNotify=false

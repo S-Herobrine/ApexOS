@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="apexGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#4C1D95"/>
+    </linearGradient>
+  </defs>
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="#F5F0FF" stroke="#7C3AED" stroke-width="4"/>
+  <path d="M 128 56 L 200 192 L 164 192 L 128 120 L 92 192 L 56 192 Z" fill="url(#apexGradDark)"/>
+  <polygon points="128,84 146,140 110,140" fill="#FFFFFF"/>
+  <circle cx="128" cy="164" r="10" fill="#7C3AED"/>
+</svg>

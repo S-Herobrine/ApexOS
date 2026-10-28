@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Android Manager
+GenericName=Android Subsystem Manager
+Comment=Manage Android apps, Google Play Store, and Waydroid settings
+Exec=python3 /usr/local/bin/satasos-android-manager.py
+Icon=android
+Terminal=false
+Type=Application
+Categories=System;Settings;Android;GTK;
+Keywords=android;google;playstore;apk;waydroid;manager;
+StartupNotify=true

@@ -1,0 +1,72 @@
+/* SatasOS Light Theme (GTK 3) */
+@define-color satasos_purple #7C3AED;
+@define-color satasos_purple_hover #6D28D9;
+@define-color satasos_purple_active #5B21B6;
+@define-color satasos_bg #F5F0FF;
+@define-color satasos_surface #FFFFFF;
+@define-color satasos_card #EDE5FF;
+@define-color satasos_text #1E1B2E;
+@define-color satasos_text_secondary #64748B;
+@define-color satasos_border #DDD6FE;
+
+* {
+    background-clip: padding-box;
+    -GtkToolButton-icon-spacing: 4;
+    -GtkTextView-error-underline-color: #EF4444;
+    -GtkScrolledWindow-overlay-scrolling: true;
+}
+
+window, .background {
+    background-color: @satasos_bg;
+    color: @satasos_text;
+}
+
+headerbar {
+    background-color: @satasos_surface;
+    border-bottom: 1px solid @satasos_border;
+    color: @satasos_text;
+    min-height: 48px;
+    padding: 0 8px;
+}
+
+button {
+    background-color: @satasos_card;
+    color: @satasos_text;
+    border: 1px solid @satasos_border;
+    border-radius: 8px;
+    padding: 6px 14px;
+    transition: all 150ms ease;
+}
+
+button:hover {
+    background-color: #DDD6FE;
+    border-color: @satasos_purple;
+}
+
+button:active {
+    background-color: @satasos_purple;
+    color: #FFFFFF;
+}
+
+button.suggested-action {
+    background-color: @satasos_purple;
+    color: #FFFFFF;
+    border: none;
+}
+
+button.suggested-action:hover {
+    background-color: @satasos_purple_hover;
+}
+
+entry {
+    background-color: @satasos_surface;
+    color: @satasos_text;
+    border: 1px solid @satasos_border;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+entry:focus {
+    border-color: @satasos_purple;
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.25);
+}

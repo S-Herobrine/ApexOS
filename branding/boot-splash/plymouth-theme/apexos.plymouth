@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=ApexOS Boot Splash
+Description=Animated pulsing purple logo bootloader animation for ApexOS
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/apexos
+ScriptFile=/usr/share/plymouth/themes/apexos/apexos.script

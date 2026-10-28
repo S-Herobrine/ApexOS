@@ -1,0 +1,32 @@
+# Plymouth Script for ApexOS Boot Animation
+# Animates glowing purple logo with progress bar
+
+screen_width = Window.GetWidth();
+screen_height = Window.GetHeight();
+
+# Load background
+bg_image = Image("background.png");
+resized_bg = bg_image.Scale(screen_width, screen_height);
+bg_sprite = Sprite(resized_bg);
+bg_sprite.SetZ(-100);
+
+# Load Logo
+logo_image = Image("logo.png");
+logo_sprite = Sprite(logo_image);
+logo_sprite.SetX(screen_width / 2 - logo_image.GetWidth() / 2);
+logo_sprite.SetY(screen_height / 2 - logo_image.GetHeight() / 2 - 40);
+
+# Progress Bar
+progress_bar.image = Image("progress_bar.png");
+progress_bar.sprite = Sprite();
+progress_bar.sprite.SetY(screen_height / 2 + 80);
+
+fun progress_callback(duration, progress) {
+    if (progress_bar.image) {
+        progress_width = (screen_width * 0.3) * progress;
+        progress_bar.sprite.SetImage(progress_bar.image.Scale(progress_width, 4));
+        progress_bar.sprite.SetX(screen_width / 2 - (screen_width * 0.3) / 2);
+    }
+}
+
+Plymouth.SetBootProgressFunction(progress_callback);

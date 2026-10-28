@@ -1,0 +1,13 @@
+{
+  "uuid": "satasos-shell@satasos.org",
+  "name": "SatasOS Shell",
+  "description": "A modern desktop shell environment for SatasOS featuring a bottom taskbar, start menu, app drawer, notification shade, and system tray with a purple dark theme.",
+  "version": 1,
+  "schema-version": 1,
+  "shell-version": ["45", "46"],
+  "url": "https://github.com/satasos/satasos-shell",
+  "settings-schema": "org.satasos.shell",
+  "gettext-domain": "satasos-shell",
+  "session-modes": ["user", "unlock-dialog"],
+  "donations": {}
+}

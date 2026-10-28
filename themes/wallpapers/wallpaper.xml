@@ -1,0 +1,23 @@
+<background>
+  <starttime>
+    <year>2026</year>
+    <month>01</month>
+    <day>01</day>
+    <hour>07</hour>
+    <minute>00</minute>
+    <second>00</second>
+  </starttime>
+  <static>
+    <duration>43200.0</duration>
+    <file>/usr/share/backgrounds/apexos/apexos-default-light.svg</file>
+  </static>
+  <transition>
+    <duration>300.0</duration>
+    <from>/usr/share/backgrounds/apexos/apexos-default-light.svg</from>
+    <to>/usr/share/backgrounds/apexos/apexos-default-dark.svg</to>
+  </transition>
+  <static>
+    <duration>43200.0</duration>
+    <file>/usr/share/backgrounds/apexos/apexos-default-dark.svg</file>
+  </static>
+</background>

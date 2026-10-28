@@ -1,0 +1,93 @@
+/* SatasOS Dark Theme (GTK 4 / Libadwaita) */
+@define-color accent_color #7C3AED;
+@define-color accent_bg_color #7C3AED;
+@define-color accent_hover_color #6D28D9;
+@define-color accent_active_color #5B21B6;
+@define-color window_bg_color #1E1B2E;
+@define-color window_fg_color #E8E0F0;
+@define-color view_bg_color #252038;
+@define-color view_fg_color #E8E0F0;
+@define-color headerbar_bg_color #2D2640;
+@define-color headerbar_fg_color #E8E0F0;
+@define-color card_bg_color #362E50;
+@define-color card_fg_color #E8E0F0;
+@define-color dialog_bg_color #2D2640;
+@define-color dialog_fg_color #E8E0F0;
+@define-color popover_bg_color #2D2640;
+@define-color popover_fg_color #E8E0F0;
+@define-color shade_color rgba(0, 0, 0, 0.36);
+
+window {
+    background-color: @window_bg_color;
+    color: @window_fg_color;
+}
+
+.card {
+    background-color: @card_bg_color;
+    border-radius: 12px;
+    border: 1px solid rgba(124, 58, 237, 0.18);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    padding: 12px;
+}
+
+headerbar {
+    background-color: @headerbar_bg_color;
+    border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+    min-height: 48px;
+}
+
+button {
+    background-color: @card_bg_color;
+    color: @window_fg_color;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px 14px;
+    transition: all 150ms cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+button:hover {
+    background-color: #443B63;
+    border-color: @accent_color;
+}
+
+button:active {
+    background-color: @accent_color;
+    color: #FFFFFF;
+}
+
+button.suggested-action {
+    background-color: @accent_color;
+    color: #FFFFFF;
+    font-weight: 600;
+}
+
+button.suggested-action:hover {
+    background-color: @accent_hover_color;
+}
+
+entry {
+    background-color: @view_bg_color;
+    color: @window_fg_color;
+    border-radius: 8px;
+    border: 1px solid rgba(124, 58, 237, 0.25);
+    padding: 8px 12px;
+}
+
+entry:focus-within {
+    border-color: @accent_color;
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.35);
+}
+
+switch {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+}
+
+switch:checked {
+    background-color: @accent_color;
+}
+
+progressbar > trough > progress {
+    background-color: @accent_color;
+    border-radius: 4px;
+}

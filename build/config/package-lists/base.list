@@ -1,0 +1,218 @@
+# =============================================================================
+# SatasOS Base System Packages
+# Core system packages for Ubuntu 24.04 LTS (Noble Numbat) base
+# =============================================================================
+
+# --- Kernel and Boot ---
+linux-generic
+linux-headers-generic
+linux-firmware
+linux-tools-generic
+
+# --- Ubuntu Core ---
+ubuntu-minimal
+ubuntu-standard
+ubuntu-server-minimal
+
+# --- Init System ---
+systemd
+systemd-sysv
+systemd-timesyncd
+dbus
+dbus-user-session
+
+# --- Boot and UEFI ---
+grub-efi-amd64
+grub-efi-amd64-signed
+grub-pc-bin
+grub2-common
+shim-signed
+efibootmgr
+os-prober
+plymouth
+plymouth-theme-spinner
+
+# --- Filesystem Support ---
+e2fsprogs
+xfsprogs
+btrfs-progs
+dosfstools
+ntfs-3g
+exfat-fuse
+exfatprogs
+fuse3
+lvm2
+mdadm
+cryptsetup
+cryptsetup-initramfs
+
+# --- Networking Core ---
+network-manager
+network-manager-gnome
+network-manager-openvpn
+network-manager-openvpn-gnome
+network-manager-pptp
+network-manager-vpnc
+wpasupplicant
+isc-dhcp-client
+iw
+wireless-tools
+rfkill
+net-tools
+iputils-ping
+iproute2
+dnsutils
+traceroute
+nmap
+ethtool
+bridge-utils
+iptables
+
+# --- Bluetooth ---
+bluez
+bluez-tools
+blueman
+
+# --- Hardware / Firmware / Drivers ---
+firmware-sof-signed
+fwupd
+fwupd-signed
+thermald
+intel-microcode
+amd64-microcode
+mesa-utils
+mesa-vulkan-drivers
+libvulkan1
+vulkan-tools
+va-driver-all
+vdpau-driver-all
+xserver-xorg-video-all
+xserver-xorg-input-all
+xserver-xorg-input-libinput
+libdrm-common
+libgl1-mesa-dri
+
+# --- GPU Drivers ---
+xserver-xorg-video-intel
+xserver-xorg-video-amdgpu
+xserver-xorg-video-radeon
+xserver-xorg-video-nouveau
+nvidia-driver-535
+libnvidia-gl-535
+
+# --- Audio ---
+pipewire
+pipewire-pulse
+pipewire-alsa
+pipewire-jack
+wireplumber
+libspa-0.2-bluetooth
+alsa-utils
+alsa-base
+pavucontrol
+
+# --- Printing ---
+cups
+cups-client
+cups-bsd
+cups-filters
+printer-driver-all
+system-config-printer
+
+# --- Power Management ---
+acpi
+acpid
+tlp
+power-profiles-daemon
+upower
+
+# --- Security ---
+apparmor
+apparmor-utils
+ufw
+gnupg
+gnupg2
+openssl
+openssh-client
+openssh-server
+libpam-gnome-keyring
+
+# --- Package Management ---
+apt-transport-https
+ca-certificates
+software-properties-common
+software-properties-gtk
+gnupg
+curl
+wget
+snapd
+flatpak
+
+# --- Core Utilities ---
+bash
+bash-completion
+coreutils
+findutils
+grep
+gzip
+bzip2
+xz-utils
+zstd
+tar
+sed
+gawk
+less
+file
+patch
+sudo
+man-db
+info
+locales
+language-pack-en
+language-pack-gnome-en
+hunspell-en-us
+fonts-ubuntu
+fonts-liberation
+fonts-noto
+fonts-noto-color-emoji
+fonts-dejavu-core
+
+# --- Hardware Info ---
+lshw
+hwinfo
+pciutils
+usbutils
+dmidecode
+lm-sensors
+smartmontools
+hdparm
+nvme-cli
+
+# --- D-Bus and IPC ---
+dbus-x11
+at-spi2-core
+xdg-utils
+xdg-user-dirs
+xdg-user-dirs-gtk
+xdg-desktop-portal
+xdg-desktop-portal-gnome
+xdg-desktop-portal-gtk
+
+# --- Accessibility ---
+orca
+at-spi2-core
+espeak-ng
+brltty
+
+# --- Miscellaneous ---
+policykit-1
+udisks2
+gvfs
+gvfs-backends
+gvfs-fuse
+avahi-daemon
+avahi-utils
+rsync
+unattended-upgrades
+apt-listchanges
+command-not-found

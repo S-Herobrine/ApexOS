@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="apexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A78BFA"/>
+      <stop offset="50%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#4C1D95"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  
+  <!-- Outer Rounded Polygon Shield -->
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="#1E1B2E" stroke="url(#apexGrad)" stroke-width="4"/>
+  
+  <!-- Apex Geometric Triangle Symbol -->
+  <path d="M 128 56 L 200 192 L 164 192 L 128 120 L 92 192 L 56 192 Z" fill="url(#apexGrad)" filter="url(#glow)"/>
+  
+  <!-- Inner Dynamic Core -->
+  <polygon points="128,84 146,140 110,140" fill="#FFFFFF" opacity="0.9"/>
+  <circle cx="128" cy="164" r="10" fill="#A78BFA"/>
+</svg>

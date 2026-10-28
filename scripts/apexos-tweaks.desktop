@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=ApexOS Tweaks
+GenericName=System Tweaker
+Comment=Windhawk-style shell and taskbar tweaker for ApexOS
+Exec=python3 /usr/local/bin/apexos-tweaks.py
+Icon=preferences-desktop
+Terminal=false
+Type=Application
+Categories=Settings;DesktopSettings;GTK;
+Keywords=tweak;customization;windhawk;taskbar;blur;animation;
+StartupNotify=true

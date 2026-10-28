@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApexOS 1.0 (Low-End & Standard Desktop Experience)</title>
+  <style>
+    :root {
+      --primary: #7C3AED;
+      --primary-hover: #6D28D9;
+      --bg-dark: #1E1B2E;
+      --surface-dark: #2D2640;
+      --card-dark: #362E50;
+      --text-light: #E8E0F0;
+      --border-dark: rgba(124, 58, 237, 0.35);
+      --acrylic: rgba(30, 27, 46, 0.85);
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+    }
+    body {
+      background: radial-gradient(circle at center, #2D224C 0%, #1E1B2E 70%, #0F0C18 100%);
+      color: var(--text-light);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Desktop Background Overlay */
+    .desktop-area {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Rainmeter Widgets on Desktop */
+    .widgets-container {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      width: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .widget {
+      background: var(--acrylic);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-dark);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .widget-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #A78BFA;
+      margin-bottom: 8px;
+    }
+    .clock-big {
+      font-size: 32px;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+    .clock-sub {
+      font-size: 12px;
+      color: #DDD6FE;
+    }
+    .progress-bar-bg {
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      height: 8px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 6px;
+      transition: width 0.3s ease;
+    }
+
+    /* Desktop App Shortcuts */
+    .desktop-icons {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .desktop-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 80px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .desktop-icon:hover {
+      background: rgba(124, 58, 237, 0.2);
+    }
+    .icon-symbol {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      background: var(--surface-dark);
+      border: 1px solid var(--border-dark);
+    }
+    .icon-label {
+      font-size: 11px;
+      text-align: center;
+      color: #FFFFFF;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    }
+
+    /* Bottom Centered Windows 11 Taskbar */
+    .taskbar {
+      height: 52px;
+      background: var(--acrylic);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 100;
+    }
+    .taskbar-center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .task-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: transparent;
+      border: none;
+      color: var(--text-light);
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    .task-btn:hover {
+      background: rgba(124, 58, 237, 0.3);
+      transform: translateY(-2px);
+    }
+    .task-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      width: 16px;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    /* System Tray */
+    .system-tray {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .system-tray:hover {
+      background: rgba(124, 58, 237, 0.2);
+    }
+    .tray-time {
+      font-size: 12px;
+      text-align: right;
+    }
+
+    /* Floating Windows */
+    .app-window {
+      position: absolute;
+      top: 100px;
+      left: 150px;
+      width: 650px;
+      height: 420px;
+      background: var(--surface-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 50;
+    }
+    .app-window.open {
+      display: flex;
+    }
+    .window-header {
+      height: 40px;
+      background: var(--bg-dark);
+      border-bottom: 1px solid var(--border-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+    }
+    .window-title {
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .window-controls {
+      display: flex;
+      gap: 8px;
+    }
+    .win-btn {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+    }
+    .win-close { background: #EF4444; }
+    .win-min { background: #F59E0B; }
+    .win-max { background: #10B981; }
+    .window-body {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    /* Start Menu */
+    .start-menu {
+      position: absolute;
+      bottom: 64px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      width: 500px;
+      height: 480px;
+      background: var(--acrylic);
+      backdrop-filter: blur(25px);
+      border: 1px solid var(--border-dark);
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+      padding: 18px;
+      display: none;
+      flex-direction: column;
+      z-index: 90;
+      opacity: 0;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .start-menu.open {
+      display: flex;
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .search-input {
+      width: 100%;
+      background: var(--surface-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 20px;
+      padding: 10px 16px;
+      color: #FFFFFF;
+      font-size: 13px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+    .search-input:focus {
+      border-color: var(--primary);
+    }
+    .pinned-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      flex: 1;
+    }
+    .app-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .app-tile:hover {
+      background: rgba(124, 58, 237, 0.25);
+    }
+
+    /* Android Notification Shade */
+    .android-shade {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      width: 360px;
+      background: var(--acrylic);
+      backdrop-filter: blur(25px);
+      border: 1px solid var(--border-dark);
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+      padding: 16px;
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      z-index: 95;
+    }
+    .android-shade.open {
+      display: flex;
+    }
+    .quick-tiles {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .quick-pill {
+      background: var(--surface-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 20px;
+      padding: 8px 12px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quick-pill.active {
+      background: var(--primary);
+      color: #FFFFFF;
+    }
+
+    /* Explorer Drive Cards */
+    .drive-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .drive-card {
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Desktop Area -->
+  <div class="desktop-area" id="desktop">
+    <!-- Desktop Icons -->
+    <div class="desktop-icons">
+      <div class="desktop-icon" onclick="openWindow('filesWin')">
+        <div class="icon-symbol">📁</div>
+        <div class="icon-label">ApexOS Files (C:, D:)</div>
+      </div>
+      <div class="desktop-icon" onclick="openWindow('terminalWin')">
+        <div class="icon-symbol">💻</div>
+        <div class="icon-label">Terminal (Linux/Win)</div>
+      </div>
+      <div class="desktop-icon" onclick="openWindow('androidWin')">
+        <div class="icon-symbol">🤖</div>
+        <div class="icon-label">Play Store & Apps</div>
+      </div>
+      <div class="desktop-icon" onclick="openWindow('tweaksWin')">
+        <div class="icon-symbol">⚙️</div>
+        <div class="icon-label">ApexOS Tweaks</div>
+      </div>
+    </div>
+
+    <!-- Desktop Widgets (Rainmeter Counterpart) -->
+    <div class="widgets-container">
+      <div class="widget">
+        <div class="widget-title">APEX CLOCK</div>
+        <div class="clock-big" id="widgetClock">12:00:00</div>
+        <div class="clock-sub" id="widgetDate">Wednesday, October 28</div>
+      </div>
+      <div class="widget">
+        <div class="widget-title">LOW-END 4GB RAM OPTIMIZER</div>
+        <div style="font-size: 12px; display: flex; justify-content: space-between;">
+          <span>RAM (4.0 GB)</span>
+          <span id="ramText">38% (1.5 GB)</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width: 38%;"></div>
+        </div>
+        <div style="font-size: 11px; color: #10B981; margin-top: 6px;">
+          ✓ zRAM Active (LZ4 Compression)
+        </div>
+      </div>
+    </div>
+
+    <!-- File Explorer Window -->
+    <div class="app-window" id="filesWin">
+      <div class="window-header">
+        <div class="window-title">📁 ApexOS Files Explorer</div>
+        <div class="window-controls">
+          <button class="win-btn win-close" onclick="closeWindow('filesWin')"></button>
+        </div>
+      </div>
+      <div class="window-body">
+        <div style="font-size: 12px; color: #A78BFA; margin-bottom: 8px;">DEVICES & DRIVES</div>
+        <div class="drive-grid">
+          <div class="drive-card">
+            <span style="font-size: 24px;">💽</span>
+            <div>
+              <div style="font-weight: 600; font-size: 13px;">Local Disk (C:)</div>
+              <div style="font-size: 11px; color: #DDD6FE;">Root Linux Filesystem (/)</div>
+            </div>
+          </div>
+          <div class="drive-card">
+            <span style="font-size: 24px;">💽</span>
+            <div>
+              <div style="font-weight: 600; font-size: 13px;">Storage Disk (D:)</div>
+              <div style="font-size: 11px; color: #DDD6FE;">Secondary Drive (/mnt)</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size: 12px; color: #A78BFA; margin-bottom: 8px;">DIRECTORIES</div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+          <div class="drive-card">📂 Documents</div>
+          <div class="drive-card">📥 Downloads</div>
+          <div class="drive-card">🖼️ Pictures</div>
+          <div class="drive-card">🎵 Music</div>
+          <div class="drive-card">🎬 Videos</div>
+          <div class="drive-card">🤖 AndroidShared</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terminal Window -->
+    <div class="app-window" id="terminalWin" style="background: #151221;">
+      <div class="window-header">
+        <div class="window-title">💻 Dual Console: Bash (Ubuntu) + PowerShell</div>
+        <div class="window-controls">
+          <button class="win-btn win-close" onclick="closeWindow('terminalWin')"></button>
+        </div>
+      </div>
+      <div class="window-body" style="font-family: monospace; font-size: 13px; color: #34D399; line-height: 1.6;">
+        <div>apex@ApexOS:~$ neofetch</div>
+        <div style="color: #A78BFA;">
+          OS: ApexOS 1.0 (Noble 24.04 LTS)<br>
+          Kernel: 6.8.0-generic (x86_64)<br>
+          Desktop: Windows 11 Fluent + Android 14 Shade<br>
+          Memory: 412 MB / 4000 MB (zRAM Enabled)<br>
+          Subsystem: Waydroid Multi-Window Active
+        </div>
+        <div style="margin-top: 10px; color: #FFFFFF;">apex@ApexOS:~$ <span style="animation: blink 1s infinite;">_</span></div>
+      </div>
+    </div>
+
+    <!-- Android Subsystem Window -->
+    <div class="app-window" id="androidWin">
+      <div class="window-header">
+        <div class="window-title">🤖 Android Subsystem (Waydroid + Play Store)</div>
+        <div class="window-controls">
+          <button class="win-btn win-close" onclick="closeWindow('androidWin')"></button>
+        </div>
+      </div>
+      <div class="window-body">
+        <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 16px;">
+          <div style="font-size: 36px;">🛍️</div>
+          <div>
+            <div style="font-size: 16px; font-weight: 700;">Google Play Store & Android 14</div>
+            <div style="font-size: 12px; color: #A78BFA;">Running natively inside Waydroid LXC Container with GPU acceleration</div>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+          <div class="app-tile" style="background: var(--card-dark);">
+            <span style="font-size: 28px;">▶️</span>
+            <span style="font-size: 12px;">YouTube</span>
+          </div>
+          <div class="app-tile" style="background: var(--card-dark);">
+            <span style="font-size: 28px;">💬</span>
+            <span style="font-size: 12px;">WhatsApp</span>
+          </div>
+          <div class="app-tile" style="background: var(--card-dark);">
+            <span style="font-size: 28px;">🗺️</span>
+            <span style="font-size: 12px;">Google Maps</span>
+          </div>
+          <div class="app-tile" style="background: var(--card-dark);">
+            <span style="font-size: 28px;">🎮</span>
+            <span style="font-size: 12px;">Play Games</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tweaks Window -->
+    <div class="app-window" id="tweaksWin">
+      <div class="window-header">
+        <div class="window-title">⚙️ ApexOS Tweaks (Windhawk Counterpart)</div>
+        <div class="window-controls">
+          <button class="win-btn win-close" onclick="closeWindow('tweaksWin')"></button>
+        </div>
+      </div>
+      <div class="window-body">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--card-dark); border-radius: 8px;">
+            <span>Taskbar Centered Icons</span>
+            <input type="checkbox" checked>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--card-dark); border-radius: 8px;">
+            <span>Acrylic Blur Transparency</span>
+            <input type="checkbox" checked>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--card-dark); border-radius: 8px;">
+            <span>Aggressive 4GB RAM Conservation (Low-End PC)</span>
+            <input type="checkbox" checked>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Start Menu -->
+    <div class="start-menu" id="startMenu">
+      <input type="text" class="search-input" placeholder="Type here to search apps, files, web...">
+      <div style="font-size: 12px; font-weight: 700; color: #A78BFA; margin-bottom: 10px;">PINNED APPS</div>
+      <div class="pinned-grid">
+        <div class="app-tile" onclick="openWindow('filesWin')">
+          <span style="font-size: 24px;">📁</span>
+          <span style="font-size: 11px;">Files</span>
+        </div>
+        <div class="app-tile" onclick="openWindow('terminalWin')">
+          <span style="font-size: 24px;">💻</span>
+          <span style="font-size: 11px;">Terminal</span>
+        </div>
+        <div class="app-tile" onclick="openWindow('androidWin')">
+          <span style="font-size: 24px;">🛍️</span>
+          <span style="font-size: 11px;">Play Store</span>
+        </div>
+        <div class="app-tile">
+          <span style="font-size: 24px;">🌐</span>
+          <span style="font-size: 11px;">Chrome</span>
+        </div>
+        <div class="app-tile">
+          <span style="font-size: 24px;">🦊</span>
+          <span style="font-size: 11px;">Firefox</span>
+        </div>
+        <div class="app-tile">
+          <span style="font-size: 24px;">📝</span>
+          <span style="font-size: 11px;">LibreOffice</span>
+        </div>
+        <div class="app-tile">
+          <span style="font-size: 24px;">🎬</span>
+          <span style="font-size: 11px;">VLC Player</span>
+        </div>
+        <div class="app-tile" onclick="openWindow('tweaksWin')">
+          <span style="font-size: 24px;">⚙️</span>
+          <span style="font-size: 11px;">Tweaks</span>
+        </div>
+      </div>
+      <div style="border-top: 1px solid var(--border-dark); padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 12px; font-weight: 600;">👤 Apex User</span>
+        <button style="background: none; border: none; font-size: 18px; cursor: pointer; color: #EF4444;">⏻</button>
+      </div>
+    </div>
+
+    <!-- Android Quick Settings Shade -->
+    <div class="android-shade" id="androidShade">
+      <div style="font-size: 13px; font-weight: 700; color: #A78BFA;">ANDROID QUICK CONTROLS</div>
+      <div class="quick-tiles">
+        <div class="quick-pill active">📶 Wi-Fi: Connected</div>
+        <div class="quick-pill active">ᛒ Bluetooth: On</div>
+        <div class="quick-pill active" onclick="toggleTheme()">🌙 Dark Mode</div>
+        <div class="quick-pill">✈️ Airplane: Off</div>
+      </div>
+      <div style="font-size: 12px; margin-top: 6px;">Notifications:</div>
+      <div style="background: var(--surface-dark); border-radius: 8px; padding: 10px; font-size: 12px;">
+        <div style="font-weight: 600;">Google Play Store</div>
+        <div style="color: #DDD6FE;">System updates installed for ApexOS 1.0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Centered Taskbar -->
+  <div class="taskbar">
+    <!-- Left: Logo & App Drawer Button -->
+    <div style="display: flex; gap: 8px;">
+      <button class="task-btn" onclick="toggleStartMenu()" title="ApexOS Start">
+        <span style="font-size: 20px;">⚡</span>
+      </button>
+    </div>
+
+    <!-- Center: App Launchers -->
+    <div class="taskbar-center">
+      <button class="task-btn" onclick="openWindow('filesWin')" title="ApexOS Files">📁</button>
+      <button class="task-btn" onclick="openWindow('terminalWin')" title="Terminal">💻</button>
+      <button class="task-btn" onclick="openWindow('androidWin')" title="Android Apps">🤖</button>
+      <button class="task-btn" onclick="openWindow('tweaksWin')" title="ApexOS Tweaks">⚙️</button>
+    </div>
+
+    <!-- Right: System Tray & Android Shade -->
+    <div class="system-tray" onclick="toggleAndroidShade()" title="Android Quick Settings & Notifications">
+      <span>📶</span>
+      <span>🔊</span>
+      <span>🔋 100%</span>
+      <div class="tray-time">
+        <div id="trayTime">12:00</div>
+        <div id="trayDate" style="font-size: 10px; color: #A78BFA;">10/28/2026</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString();
+      const dateStr = now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+      document.getElementById('widgetClock').innerText = timeStr;
+      document.getElementById('widgetDate').innerText = dateStr;
+      document.getElementById('trayTime').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function toggleStartMenu() {
+      const menu = document.getElementById('startMenu');
+      menu.classList.toggle('open');
+      document.getElementById('androidShade').classList.remove('open');
+    }
+
+    function toggleAndroidShade() {
+      const shade = document.getElementById('androidShade');
+      shade.classList.toggle('open');
+      document.getElementById('startMenu').classList.remove('open');
+    }
+
+    function openWindow(id) {
+      document.getElementById(id).classList.add('open');
+      document.getElementById('startMenu').classList.remove('open');
+    }
+
+    function closeWindow(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    let isDark = true;
+    function toggleTheme() {
+      isDark = !isDark;
+      if (isDark) {
+        document.body.style.background = 'radial-gradient(circle at center, #2D224C 0%, #1E1B2E 70%, #0F0C18 100%)';
+      } else {
+        document.body.style.background = 'radial-gradient(circle at center, #FFFFFF 0%, #F5F0FF 70%, #E9DEFF 100%)';
+      }
+    }
+  </script>
+</body>
+</html>

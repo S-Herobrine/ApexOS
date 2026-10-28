@@ -1,0 +1,26 @@
+# Build output & binary images
+build/output/
+build/chroot/
+build/chroot-lowend/
+build/chroot-standard/
+build/iso/
+build/iso-standard/
+build/.build/
+*.iso
+*.squashfs
+*.qcow2
+*.tar.gz
+
+# Cache & Temporary files
+/tmp/
+/var/tmp/
+*.log
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class

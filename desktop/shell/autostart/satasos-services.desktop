@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=SatasOS Core Services
+Comment=Initialize SatasOS shell extensions, widgets and integration
+Exec=/usr/local/bin/satasos-welcome.sh --autostart
+Terminal=false
+Type=Application
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

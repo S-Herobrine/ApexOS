@@ -1,0 +1,20 @@
+# SatasOS Android Integration Subsystem (Waydroid + LXC + GMS Dependencies)
+waydroid
+lxc
+python3-gbinder
+android-tools-adb
+android-tools-fastboot
+dnsmasq
+iptables
+nftables
+kmod
+curl
+tar
+unzip
+libglib2.0-dev
+python3-pip
+python3-requests
+python3-tqdm
+wl-clipboard
+xclip
+zenity

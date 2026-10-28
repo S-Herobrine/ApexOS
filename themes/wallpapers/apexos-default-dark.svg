@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="75%">
+      <stop offset="0%" stop-color="#2D224C"/>
+      <stop offset="60%" stop-color="#1E1B2E"/>
+      <stop offset="100%" stop-color="#0F0C18"/>
+    </radialGradient>
+    <linearGradient id="poly1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7C3AED" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#311059" stop-opacity="0.1"/>
+    </linearGradient>
+    <linearGradient id="poly2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#A78BFA" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#6D28D9" stop-opacity="0.05"/>
+    </linearGradient>
+  </defs>
+  
+  <rect width="1920" height="1080" fill="url(#bgGrad)"/>
+  
+  <!-- Flowing Geometric Polygons -->
+  <polygon points="0,1080 600,600 1200,900 1920,400 1920,1080" fill="url(#poly1)"/>
+  <polygon points="300,0 960,540 1600,200 1920,600 1920,0" fill="url(#poly2)"/>
+  <polygon points="0,0 450,450 150,800 0,600" fill="url(#poly1)"/>
+  
+  <!-- Central Soft Glow -->
+  <circle cx="960" cy="540" r="320" fill="#7C3AED" opacity="0.15" filter="blur(80px)"/>
+  
+  <!-- Apex Subtle Crest Emblem -->
+  <path d="M 960 460 L 1020 580 L 990 580 L 960 520 L 930 580 L 900 580 Z" fill="#DDD6FE" opacity="0.25"/>
+</svg>

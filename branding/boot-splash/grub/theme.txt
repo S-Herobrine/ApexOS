@@ -1,0 +1,33 @@
+# GRUB2 Theme for ApexOS (Purple Dark Edition)
+title-text: ""
+desktop-image: "background.png"
+desktop-color: "#1E1B2E"
+
+# Boot menu box
++ boot_menu {
+    left = 25%
+    top = 35%
+    width = 50%
+    height = 40%
+    item_color = "#DDD6FE"
+    selected_item_color = "#FFFFFF"
+    item_height = 36
+    item_padding = 6
+    item_spacing = 10
+    selected_item_pixmap_style = "selected_*.png"
+}
+
+# Progress bar
++ progress_bar {
+    id = "__timeout__"
+    left = 35%
+    top = 80%
+    width = 30%
+    height = 8
+    show_text = true
+    text_color = "#A78BFA"
+    font = "Inter 10"
+    text = "Booting ApexOS in %d seconds..."
+    fg_color = "#7C3AED"
+    bg_color = "#2D2640"
+}

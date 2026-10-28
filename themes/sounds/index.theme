@@ -1,0 +1,7 @@
+[Sound Theme]
+Name=ApexOS
+Comment=Modern subtle acoustic sound scheme for ApexOS
+Directories=stereo
+
+[stereo]
+OutputProfile=stereo

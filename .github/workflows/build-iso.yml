@@ -1,0 +1,61 @@
+name: Build ApexOS ISOs
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-lowend:
+    name: Build ApexOS Low-End Edition ISO
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install ISO Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            live-build debootstrap xorriso squashfs-tools \
+            mtools dosfstools grub-pc-bin grub-efi-amd64-bin \
+            isolinux syslinux-utils zram-tools zstd
+
+      - name: Build Low-End ISO (4GB RAM Optimized)
+        run: |
+          chmod +x build/build-iso-lowend.sh build/hooks/*.sh scripts/*.sh
+          sudo bash build/build-iso-lowend.sh
+
+      - name: Upload Low-End ISO Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ApexOS-1.0-LowEnd-amd64-iso
+          path: build/output/*.iso
+          retention-days: 14
+
+  build-standard:
+    name: Build ApexOS Standard Edition ISO
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install ISO Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            live-build debootstrap xorriso squashfs-tools \
+            mtools dosfstools grub-pc-bin grub-efi-amd64-bin \
+            isolinux syslinux-utils zstd
+
+      - name: Build Standard ISO
+        run: |
+          chmod +x build/build-iso-standard.sh build/hooks/*.sh scripts/*.sh
+          sudo bash build/build-iso-standard.sh
+
+      - name: Upload Standard ISO Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ApexOS-1.0-Standard-amd64-iso
+          path: build/output/*.iso
+          retention-days: 14

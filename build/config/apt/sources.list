@@ -1,0 +1,18 @@
+# SatasOS Official Repositories (Ubuntu 24.04 Noble Numbat)
+deb http://archive.ubuntu.com/ubuntu/ noble main restricted universe multiverse
+deb http://archive.ubuntu.com/ubuntu/ noble-updates main restricted universe multiverse
+deb http://security.ubuntu.com/ubuntu/ noble-security main restricted universe multiverse
+deb http://archive.ubuntu.com/ubuntu/ noble-backports main restricted universe multiverse
+
+# Google Chrome Repository
+deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main
+
+# Microsoft Edge & VS Code Repositories
+deb [arch=amd64] https://packages.microsoft.com/repos/edge stable main
+deb [arch=amd64] https://packages.microsoft.com/repos/code stable main
+
+# Opera Web Browser
+deb [arch=amd64] https://deb.opera.com/opera-stable/ stable non-free
+
+# Waydroid Android Subsystem
+deb [arch=amd64] https://repo.waydro.id/ noble main

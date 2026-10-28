@@ -1,0 +1,1194 @@
+/*
+ * SatasOS Shell - Complete Stylesheet
+ *
+ * Purple Dark Theme
+ * Primary:  #7C3AED
+ * Hover:    #6D28D9
+ * Active:   #5B21B6
+ * Dark BG:  #1E1B2E
+ * Surface:  #2D2640
+ * Text:     #E8E0F0
+ */
+
+/* ============================================================
+ * GLOBAL DEFAULTS
+ * ============================================================ */
+
+* {
+    font-family: "Inter", "Cantarell", "Noto Sans", sans-serif;
+    color: #E8E0F0;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+}
+
+StScrollBar {
+    padding: 0;
+}
+
+StScrollBar StButton#vhandle,
+StScrollBar StButton#hhandle {
+    background-color: rgba(124, 58, 237, 0.4);
+    border-radius: 99px;
+    min-width: 6px;
+    min-height: 6px;
+    margin: 2px;
+}
+
+StScrollBar StButton#vhandle:hover,
+StScrollBar StButton#hhandle:hover {
+    background-color: rgba(124, 58, 237, 0.7);
+}
+
+StScrollBar StButton#vhandle:active,
+StScrollBar StButton#hhandle:active {
+    background-color: #7C3AED;
+}
+
+StScrollView {
+    -st-vfade-offset: 24px;
+}
+
+
+/* ============================================================
+ * BOTTOM TASKBAR
+ * ============================================================ */
+
+.satasos-taskbar {
+    background-color: rgba(30, 27, 46, 0.92);
+    border-top: 1px solid rgba(124, 58, 237, 0.3);
+    box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(30px);
+}
+
+.satasos-taskbar-inner {
+    padding: 0 8px;
+    spacing: 4px;
+}
+
+.satasos-start-button {
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 8px 14px;
+    margin: 4px 2px;
+    transition-duration: 200ms;
+}
+
+.satasos-start-button:hover {
+    background-color: rgba(124, 58, 237, 0.25);
+}
+
+.satasos-start-button:active {
+    background-color: rgba(91, 33, 182, 0.5);
+}
+
+.satasos-start-icon {
+    color: #7C3AED;
+}
+
+.satasos-taskbar-button {
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin: 4px 2px;
+    transition-duration: 200ms;
+}
+
+.satasos-taskbar-button:hover {
+    background-color: rgba(124, 58, 237, 0.2);
+}
+
+.satasos-taskbar-button:active {
+    background-color: rgba(91, 33, 182, 0.4);
+}
+
+.satasos-taskbar-icon {
+    color: #E8E0F0;
+    icon-shadow: none;
+}
+
+.satasos-pinned-apps {
+    spacing: 2px;
+    margin: 0 4px;
+}
+
+.satasos-running-apps {
+    spacing: 2px;
+    margin: 0 4px;
+}
+
+.satasos-taskbar-app-button {
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 4px;
+    margin: 4px 1px;
+    transition-duration: 200ms;
+}
+
+.satasos-taskbar-app-button:hover {
+    background-color: rgba(124, 58, 237, 0.2);
+}
+
+.satasos-taskbar-app-button:active {
+    background-color: rgba(91, 33, 182, 0.35);
+}
+
+.satasos-taskbar-app-button:focus {
+    background-color: rgba(124, 58, 237, 0.15);
+}
+
+.satasos-taskbar-app-button.running {
+    border-bottom: 3px solid #7C3AED;
+    border-radius: 8px 8px 4px 4px;
+}
+
+.satasos-taskbar-app-button.running:hover {
+    background-color: rgba(124, 58, 237, 0.25);
+    border-bottom-color: #A78BFA;
+}
+
+
+/* ============================================================
+ * SYSTEM TRAY
+ * ============================================================ */
+
+.satasos-system-tray {
+    spacing: 2px;
+    margin: 0 4px;
+}
+
+.satasos-tray-button {
+    background-color: transparent;
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin: 4px 1px;
+    transition-duration: 150ms;
+}
+
+.satasos-tray-button:hover {
+    background-color: rgba(124, 58, 237, 0.2);
+}
+
+.satasos-tray-button:active {
+    background-color: rgba(91, 33, 182, 0.4);
+}
+
+.satasos-tray-icon {
+    color: #E8E0F0;
+    icon-shadow: none;
+}
+
+
+/* ============================================================
+ * CLOCK
+ * ============================================================ */
+
+.satasos-clock-button {
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 6px 12px;
+    margin: 4px 4px;
+    transition-duration: 150ms;
+}
+
+.satasos-clock-button:hover {
+    background-color: rgba(124, 58, 237, 0.2);
+}
+
+.satasos-clock {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #E8E0F0;
+    letter-spacing: 0.3px;
+}
+
+.satasos-quick-settings-button {
+    background-color: transparent;
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin: 4px 1px;
+    transition-duration: 150ms;
+}
+
+.satasos-quick-settings-button:hover {
+    background-color: rgba(124, 58, 237, 0.2);
+}
+
+.satasos-quick-settings-button:active {
+    background-color: rgba(91, 33, 182, 0.4);
+}
+
+.satasos-show-desktop-button {
+    background-color: rgba(124, 58, 237, 0.15);
+    border-radius: 0;
+    margin: 0;
+    padding: 0;
+    transition-duration: 150ms;
+}
+
+.satasos-show-desktop-button:hover {
+    background-color: rgba(124, 58, 237, 0.4);
+}
+
+
+/* ============================================================
+ * START MENU
+ * ============================================================ */
+
+.satasos-start-menu {
+    background-color: rgba(30, 27, 46, 0.96);
+    border: 1px solid rgba(124, 58, 237, 0.25);
+    border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55), 0 0 1px rgba(124, 58, 237, 0.3);
+    padding: 0;
+}
+
+.satasos-start-menu-inner {
+    padding: 20px 24px;
+    spacing: 16px;
+}
+
+
+/* Search Bar */
+
+.satasos-search-box {
+    background-color: rgba(45, 38, 64, 0.85);
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    border-radius: 10px;
+    padding: 8px 14px;
+    spacing: 10px;
+    transition-duration: 200ms;
+}
+
+.satasos-search-box:focus-within {
+    border-color: rgba(124, 58, 237, 0.5);
+    background-color: rgba(45, 38, 64, 1.0);
+}
+
+.satasos-search-icon {
+    color: rgba(232, 224, 240, 0.5);
+}
+
+.satasos-search-entry {
+    background-color: transparent;
+    border: 0;
+    color: #E8E0F0;
+    font-size: 14px;
+    caret-color: #7C3AED;
+    selection-background-color: rgba(124, 58, 237, 0.35);
+}
+
+.satasos-search-entry:focus {
+    border: 0;
+    box-shadow: none;
+}
+
+.satasos-search-entry StLabel {
+    color: rgba(232, 224, 240, 0.4);
+}
+
+
+/* Section Headers */
+
+.satasos-section-header {
+    padding: 0 2px;
+    margin-top: 4px;
+}
+
+.satasos-section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #E8E0F0;
+    letter-spacing: 0.3px;
+}
+
+.satasos-section-link {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(167, 139, 250, 0.85);
+    background-color: transparent;
+    border: 0;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition-duration: 150ms;
+}
+
+.satasos-section-link:hover {
+    color: #A78BFA;
+    background-color: rgba(124, 58, 237, 0.15);
+}
+
+
+/* Pinned Apps Grid */
+
+.satasos-pinned-scroll {
+    min-height: 260px;
+}
+
+.satasos-pinned-grid {
+    padding: 8px 4px;
+}
+
+.satasos-pinned-app {
+    background-color: transparent;
+    border-radius: 12px;
+    padding: 12px 8px;
+    min-width: 80px;
+    min-height: 88px;
+    transition-duration: 200ms;
+}
+
+.satasos-pinned-app:hover {
+    background-color: rgba(124, 58, 237, 0.15);
+}
+
+.satasos-pinned-app:active {
+    background-color: rgba(91, 33, 182, 0.25);
+    transition-duration: 80ms;
+}
+
+.satasos-pinned-app-inner {
+    spacing: 6px;
+}
+
+.satasos-pinned-app-label {
+    font-size: 11.5px;
+    font-weight: 400;
+    color: rgba(232, 224, 240, 0.85);
+    text-align: center;
+}
+
+
+/* Recommended Section */
+
+.satasos-recommended-list {
+    spacing: 4px;
+    padding: 4px 0;
+}
+
+.satasos-recommended-item {
+    background-color: transparent;
+    border-radius: 10px;
+    padding: 8px 12px;
+    spacing: 12px;
+    transition-duration: 150ms;
+}
+
+.satasos-recommended-item:hover {
+    background-color: rgba(124, 58, 237, 0.12);
+}
+
+.satasos-recommended-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #E8E0F0;
+}
+
+.satasos-recommended-detail {
+    font-size: 11px;
+    font-weight: 400;
+    color: rgba(232, 224, 240, 0.45);
+}
+
+.satasos-recommended-empty {
+    font-size: 13px;
+    color: rgba(232, 224, 240, 0.35);
+    padding: 16px;
+    text-align: center;
+}
+
+
+/* Footer */
+
+.satasos-start-footer {
+    padding: 8px 4px 4px 4px;
+    border-top: 1px solid rgba(124, 58, 237, 0.12);
+    margin-top: 4px;
+}
+
+.satasos-footer-button {
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 8px 12px;
+    spacing: 8px;
+    transition-duration: 150ms;
+}
+
+.satasos-footer-button:hover {
+    background-color: rgba(124, 58, 237, 0.15);
+}
+
+.satasos-footer-icon {
+    color: rgba(232, 224, 240, 0.7);
+    margin-right: 8px;
+}
+
+.satasos-footer-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #E8E0F0;
+}
+
+.satasos-power-button:hover {
+    background-color: rgba(220, 38, 38, 0.2);
+}
+
+.satasos-power-button:hover .satasos-footer-icon {
+    color: #FCA5A5;
+}
+
+
+/* ============================================================
+ * APP DRAWER (Full-Screen Overlay)
+ * ============================================================ */
+
+.satasos-app-drawer {
+    background-color: rgba(30, 27, 46, 0.94);
+    backdrop-filter: blur(40px);
+}
+
+.satasos-app-drawer-overlay {
+    padding: 40px 60px 20px 60px;
+    spacing: 24px;
+}
+
+.satasos-drawer-search-row {
+    padding: 0 0 8px 0;
+}
+
+.satasos-drawer-search-entry {
+    background-color: rgba(45, 38, 64, 0.85);
+    border: 1px solid rgba(124, 58, 237, 0.25);
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-size: 15px;
+    color: #E8E0F0;
+    caret-color: #7C3AED;
+    selection-background-color: rgba(124, 58, 237, 0.35);
+    transition-duration: 200ms;
+}
+
+.satasos-drawer-search-entry:focus {
+    border-color: rgba(124, 58, 237, 0.5);
+    background-color: rgba(45, 38, 64, 1.0);
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15);
+}
+
+.satasos-drawer-scroll {
+    padding: 0 20px;
+}
+
+.satasos-app-grid {
+    padding: 20px;
+}
+
+.satasos-drawer-app {
+    background-color: transparent;
+    border-radius: 14px;
+    padding: 16px 12px;
+    min-width: 96px;
+    min-height: 100px;
+    transition-duration: 200ms;
+}
+
+.satasos-drawer-app:hover {
+    background-color: rgba(124, 58, 237, 0.15);
+}
+
+.satasos-drawer-app:active {
+    background-color: rgba(91, 33, 182, 0.28);
+    transition-duration: 80ms;
+}
+
+.satasos-drawer-app:focus {
+    background-color: rgba(124, 58, 237, 0.1);
+    border: 1px solid rgba(124, 58, 237, 0.35);
+}
+
+.satasos-drawer-app-inner {
+    spacing: 8px;
+}
+
+.satasos-drawer-app-label {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(232, 224, 240, 0.85);
+    text-align: center;
+    max-width: 88px;
+}
+
+
+/* ============================================================
+ * NOTIFICATION SHADE
+ * ============================================================ */
+
+.satasos-notification-shade {
+    background-color: rgba(30, 27, 46, 0.95);
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 1px rgba(124, 58, 237, 0.25);
+    margin: 8px;
+}
+
+.satasos-notification-inner {
+    padding: 20px;
+    spacing: 14px;
+}
+
+
+/* Quick Settings Toggles */
+
+.satasos-quick-settings {
+    padding: 4px 0;
+}
+
+.satasos-qs-grid {
+    padding: 0;
+}
+
+.satasos-qs-toggle {
+    background-color: rgba(45, 38, 64, 0.75);
+    border: 1px solid rgba(124, 58, 237, 0.12);
+    border-radius: 12px;
+    padding: 12px 8px;
+    min-width: 88px;
+    min-height: 64px;
+    transition-duration: 200ms;
+}
+
+.satasos-qs-toggle:hover {
+    background-color: rgba(45, 38, 64, 0.95);
+    border-color: rgba(124, 58, 237, 0.3);
+}
+
+.satasos-qs-toggle.active {
+    background-color: rgba(124, 58, 237, 0.25);
+    border-color: rgba(124, 58, 237, 0.5);
+}
+
+.satasos-qs-toggle.active:hover {
+    background-color: rgba(124, 58, 237, 0.35);
+}
+
+.satasos-qs-toggle.active .satasos-qs-icon {
+    color: #A78BFA;
+}
+
+.satasos-qs-icon {
+    color: rgba(232, 224, 240, 0.6);
+    icon-shadow: none;
+    margin-bottom: 4px;
+}
+
+.satasos-qs-label {
+    font-size: 10.5px;
+    font-weight: 500;
+    color: rgba(232, 224, 240, 0.7);
+    letter-spacing: 0.2px;
+}
+
+.satasos-qs-toggle.active .satasos-qs-label {
+    color: #E8E0F0;
+}
+
+
+/* Sliders (brightness/volume) */
+
+.satasos-slider-row {
+    spacing: 12px;
+    padding: 4px 4px;
+}
+
+.satasos-slider-icon {
+    color: rgba(232, 224, 240, 0.5);
+    icon-shadow: none;
+}
+
+.satasos-slider {
+    min-height: 24px;
+    padding: 8px 0;
+}
+
+.satasos-slider-track {
+    background-color: rgba(45, 38, 64, 0.8);
+    border-radius: 99px;
+    min-height: 6px;
+}
+
+.satasos-slider-fill {
+    background-color: #7C3AED;
+    border-radius: 99px;
+    min-height: 6px;
+    transition-duration: 100ms;
+}
+
+
+/* Notification List */
+
+.satasos-notif-header {
+    padding: 8px 0 4px 0;
+    border-top: 1px solid rgba(124, 58, 237, 0.1);
+}
+
+.satasos-notif-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #E8E0F0;
+    letter-spacing: 0.3px;
+}
+
+.satasos-notif-clear-btn {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: rgba(167, 139, 250, 0.8);
+    background-color: transparent;
+    border: 0;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition-duration: 150ms;
+}
+
+.satasos-notif-clear-btn:hover {
+    color: #A78BFA;
+    background-color: rgba(124, 58, 237, 0.15);
+}
+
+.satasos-notif-scroll {
+    margin-top: 4px;
+}
+
+.satasos-notif-list {
+    spacing: 8px;
+    padding: 4px 0;
+}
+
+.satasos-notif-item {
+    background-color: rgba(45, 38, 64, 0.6);
+    border: 1px solid rgba(124, 58, 237, 0.1);
+    border-radius: 12px;
+    padding: 12px 14px;
+    spacing: 10px;
+    transition-duration: 200ms;
+}
+
+.satasos-notif-item:hover {
+    background-color: rgba(45, 38, 64, 0.85);
+    border-color: rgba(124, 58, 237, 0.2);
+}
+
+.satasos-notif-item-icon {
+    color: rgba(232, 224, 240, 0.6);
+    icon-shadow: none;
+}
+
+.satasos-notif-item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #E8E0F0;
+}
+
+.satasos-notif-item-body {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(232, 224, 240, 0.6);
+}
+
+.satasos-notif-item-time {
+    font-size: 10.5px;
+    font-weight: 400;
+    color: rgba(232, 224, 240, 0.35);
+}
+
+.satasos-notif-dismiss {
+    background-color: transparent;
+    border-radius: 99px;
+    padding: 4px;
+    transition-duration: 150ms;
+}
+
+.satasos-notif-dismiss:hover {
+    background-color: rgba(220, 38, 38, 0.2);
+}
+
+.satasos-notif-empty {
+    padding: 40px 20px;
+    spacing: 12px;
+}
+
+.satasos-notif-empty-icon {
+    color: rgba(232, 224, 240, 0.2);
+    icon-shadow: none;
+}
+
+.satasos-notif-empty-label {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(232, 224, 240, 0.3);
+}
+
+
+/* ============================================================
+ * LOCK SCREEN OVERLAY
+ * ============================================================ */
+
+.satasos-lock-screen {
+    background-color: rgba(20, 17, 36, 0.97);
+    backdrop-filter: blur(50px);
+}
+
+.satasos-lock-center {
+    spacing: 16px;
+    padding: 40px;
+}
+
+.satasos-lock-clock {
+    font-size: 72px;
+    font-weight: 200;
+    color: #E8E0F0;
+    letter-spacing: -2px;
+    text-align: center;
+}
+
+.satasos-lock-date {
+    font-size: 18px;
+    font-weight: 400;
+    color: rgba(232, 224, 240, 0.6);
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.satasos-lock-avatar {
+    color: rgba(124, 58, 237, 0.5);
+    icon-shadow: none;
+    margin-bottom: 8px;
+}
+
+.satasos-lock-username {
+    font-size: 20px;
+    font-weight: 500;
+    color: #E8E0F0;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.satasos-lock-password {
+    background-color: rgba(45, 38, 64, 0.8);
+    border: 2px solid rgba(124, 58, 237, 0.3);
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-size: 16px;
+    color: #E8E0F0;
+    min-width: 280px;
+    caret-color: #7C3AED;
+    selection-background-color: rgba(124, 58, 237, 0.35);
+    transition-duration: 200ms;
+}
+
+.satasos-lock-password:focus {
+    border-color: #7C3AED;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+}
+
+
+/* ============================================================
+ * WINDOW PREVIEW THUMBNAILS
+ * ============================================================ */
+
+.satasos-window-preview {
+    background-color: rgba(30, 27, 46, 0.9);
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    padding: 8px;
+    margin: 4px;
+    transition-duration: 200ms;
+}
+
+.satasos-window-preview:hover {
+    border-color: rgba(124, 58, 237, 0.45);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+.satasos-window-preview-title {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(232, 224, 240, 0.8);
+    text-align: center;
+    padding: 6px 4px 2px 4px;
+}
+
+.satasos-window-preview-close {
+    background-color: rgba(220, 38, 38, 0.6);
+    border-radius: 99px;
+    min-width: 20px;
+    min-height: 20px;
+    transition-duration: 150ms;
+}
+
+.satasos-window-preview-close:hover {
+    background-color: rgba(220, 38, 38, 0.9);
+}
+
+.satasos-window-preview-close StIcon {
+    color: #FFFFFF;
+    icon-size: 12px;
+}
+
+
+/* ============================================================
+ * GENERIC UI ELEMENTS
+ * ============================================================ */
+
+/* Buttons */
+
+.satasos-button {
+    background-color: #7C3AED;
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #FFFFFF;
+    transition-duration: 150ms;
+}
+
+.satasos-button:hover {
+    background-color: #6D28D9;
+}
+
+.satasos-button:active {
+    background-color: #5B21B6;
+    transition-duration: 50ms;
+}
+
+.satasos-button:focus {
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.4);
+}
+
+.satasos-button:insensitive {
+    background-color: rgba(45, 38, 64, 0.6);
+    color: rgba(232, 224, 240, 0.3);
+}
+
+.satasos-button-secondary {
+    background-color: rgba(45, 38, 64, 0.75);
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #E8E0F0;
+    transition-duration: 150ms;
+}
+
+.satasos-button-secondary:hover {
+    background-color: rgba(45, 38, 64, 0.95);
+    border-color: rgba(124, 58, 237, 0.35);
+}
+
+.satasos-button-secondary:active {
+    background-color: rgba(91, 33, 182, 0.25);
+}
+
+.satasos-button-danger {
+    background-color: rgba(220, 38, 38, 0.15);
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #FCA5A5;
+    transition-duration: 150ms;
+}
+
+.satasos-button-danger:hover {
+    background-color: rgba(220, 38, 38, 0.3);
+    border-color: rgba(220, 38, 38, 0.45);
+}
+
+.satasos-button-danger:active {
+    background-color: rgba(220, 38, 38, 0.45);
+}
+
+
+/* Text Entries */
+
+.satasos-entry {
+    background-color: rgba(45, 38, 64, 0.8);
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 14px;
+    color: #E8E0F0;
+    caret-color: #7C3AED;
+    selection-background-color: rgba(124, 58, 237, 0.35);
+    transition-duration: 200ms;
+}
+
+.satasos-entry:focus {
+    border-color: rgba(124, 58, 237, 0.55);
+    background-color: rgba(45, 38, 64, 1.0);
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.12);
+}
+
+.satasos-entry:hover {
+    border-color: rgba(124, 58, 237, 0.35);
+}
+
+.satasos-entry:insensitive {
+    background-color: rgba(45, 38, 64, 0.4);
+    color: rgba(232, 224, 240, 0.3);
+    border-color: rgba(124, 58, 237, 0.08);
+}
+
+
+/* Switches / Toggles */
+
+.satasos-switch {
+    background-color: rgba(45, 38, 64, 0.7);
+    border: 2px solid rgba(124, 58, 237, 0.2);
+    border-radius: 99px;
+    min-width: 44px;
+    min-height: 24px;
+    transition-duration: 250ms;
+}
+
+.satasos-switch:checked {
+    background-color: #7C3AED;
+    border-color: #7C3AED;
+}
+
+.satasos-switch:hover {
+    border-color: rgba(124, 58, 237, 0.4);
+}
+
+.satasos-switch:checked:hover {
+    background-color: #6D28D9;
+    border-color: #6D28D9;
+}
+
+.satasos-switch-handle {
+    background-color: #E8E0F0;
+    border-radius: 99px;
+    min-width: 18px;
+    min-height: 18px;
+    margin: 1px;
+    transition-duration: 200ms;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+
+/* Tooltips */
+
+.satasos-tooltip {
+    background-color: rgba(45, 38, 64, 0.95);
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 400;
+    color: #E8E0F0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+
+/* Context Menus */
+
+.satasos-context-menu {
+    background-color: rgba(30, 27, 46, 0.96);
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+    padding: 6px;
+}
+
+.satasos-context-menu-item {
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 400;
+    color: #E8E0F0;
+    spacing: 10px;
+    transition-duration: 100ms;
+}
+
+.satasos-context-menu-item:hover {
+    background-color: rgba(124, 58, 237, 0.18);
+}
+
+.satasos-context-menu-item:active {
+    background-color: rgba(91, 33, 182, 0.3);
+}
+
+.satasos-context-menu-separator {
+    background-color: rgba(124, 58, 237, 0.1);
+    min-height: 1px;
+    margin: 4px 8px;
+}
+
+
+/* Badges / Chips */
+
+.satasos-badge {
+    background-color: #7C3AED;
+    border-radius: 99px;
+    min-width: 18px;
+    min-height: 18px;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #FFFFFF;
+    text-align: center;
+}
+
+.satasos-badge-dot {
+    background-color: #7C3AED;
+    border-radius: 99px;
+    min-width: 8px;
+    min-height: 8px;
+}
+
+
+/* ============================================================
+ * ANIMATIONS & KEYFRAMES (via transitions)
+ * ============================================================ */
+
+.satasos-fade-in {
+    transition-property: opacity;
+    transition-duration: 200ms;
+    transition-timing-function: ease-out;
+}
+
+.satasos-fade-out {
+    transition-property: opacity;
+    transition-duration: 150ms;
+    transition-timing-function: ease-in;
+}
+
+.satasos-slide-up {
+    transition-property: translation-y, opacity;
+    transition-duration: 250ms;
+    transition-timing-function: ease-out;
+}
+
+.satasos-slide-down {
+    transition-property: translation-y, opacity;
+    transition-duration: 200ms;
+    transition-timing-function: ease-in;
+}
+
+.satasos-scale-in {
+    transition-property: scale-x, scale-y, opacity;
+    transition-duration: 200ms;
+    transition-timing-function: ease-out;
+}
+
+.satasos-bounce {
+    transition-property: translation-y;
+    transition-duration: 300ms;
+    transition-timing-function: ease-in-out;
+}
+
+
+/* ============================================================
+ * MEDIA PLAYER WIDGET (in notification shade)
+ * ============================================================ */
+
+.satasos-media-widget {
+    background-color: rgba(45, 38, 64, 0.65);
+    border: 1px solid rgba(124, 58, 237, 0.12);
+    border-radius: 14px;
+    padding: 14px 16px;
+    spacing: 10px;
+}
+
+.satasos-media-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #E8E0F0;
+}
+
+.satasos-media-artist {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(232, 224, 240, 0.55);
+}
+
+.satasos-media-controls {
+    spacing: 16px;
+}
+
+.satasos-media-btn {
+    background-color: transparent;
+    border-radius: 99px;
+    padding: 8px;
+    transition-duration: 150ms;
+}
+
+.satasos-media-btn:hover {
+    background-color: rgba(124, 58, 237, 0.2);
+}
+
+.satasos-media-btn:active {
+    background-color: rgba(91, 33, 182, 0.35);
+}
+
+.satasos-media-btn-play {
+    background-color: #7C3AED;
+    border-radius: 99px;
+    padding: 10px;
+}
+
+.satasos-media-btn-play:hover {
+    background-color: #6D28D9;
+}
+
+.satasos-media-progress {
+    background-color: rgba(45, 38, 64, 0.8);
+    border-radius: 99px;
+    min-height: 4px;
+}
+
+.satasos-media-progress-fill {
+    background-color: #7C3AED;
+    border-radius: 99px;
+    min-height: 4px;
+}
+
+
+/* ============================================================
+ * OSD (On-Screen Display)
+ * ============================================================ */
+
+.satasos-osd {
+    background-color: rgba(30, 27, 46, 0.92);
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+    padding: 16px 24px;
+    spacing: 12px;
+}
+
+.satasos-osd-icon {
+    color: #7C3AED;
+    icon-shadow: none;
+}
+
+.satasos-osd-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #E8E0F0;
+}
+
+.satasos-osd-bar {
+    background-color: rgba(45, 38, 64, 0.8);
+    border-radius: 99px;
+    min-height: 6px;
+    min-width: 200px;
+}
+
+.satasos-osd-bar-fill {
+    background-color: #7C3AED;
+    border-radius: 99px;
+    min-height: 6px;
+}

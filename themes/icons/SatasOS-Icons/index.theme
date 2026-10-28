@@ -1,0 +1,26 @@
+[Icon Theme]
+Name=ApexOS-Icons
+Comment=Sleek purple modern flat icon theme for ApexOS (combining Fluent & Papirus aesthetics)
+Inherits=Papirus-Dark,Papirus,Adwaita,hicolor
+Directories=scalable/apps,scalable/places,scalable/status
+
+[scalable/apps]
+Size=48
+Type=Scalable
+MinSize=16
+MaxSize=512
+Context=Applications
+
+[scalable/places]
+Size=48
+Type=Scalable
+MinSize=16
+MaxSize=512
+Context=Places
+
+[scalable/status]
+Size=24
+Type=Scalable
+MinSize=16
+MaxSize=64
+Context=Status
