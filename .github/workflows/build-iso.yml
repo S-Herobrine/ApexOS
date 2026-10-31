@@ -8,12 +8,12 @@ on:
       edition:
         description: 'Which ApexOS Edition to build'
         required: true
-        default: 'lowend'
+        default: 'both'
         type: choice
         options:
+          - 'both'
           - 'lowend'
           - 'standard'
-          - 'both'
 
 jobs:
   build-lowend:
@@ -53,18 +53,18 @@ jobs:
 
   build-standard:
     name: Build ApexOS Standard Edition (Full Apps)
-    if: github.event.inputs.edition == 'standard' || github.event.inputs.edition == 'both'
+    if: github.event_name == 'push' || github.event.inputs.edition == 'standard' || github.event.inputs.edition == 'both'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
       - name: Free Runner Disk Space
         run: |
           echo "Freeing runner storage..."
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/powershell
           df -h
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Install ISO Build Dependencies
         run: |
