@@ -70,15 +70,26 @@ qemu-img create -f qcow2 /tmp/apexos-test-disk.qcow2 10G 2>/dev/null || true
 
 # 5. Start noVNC web server on port 6080
 echo "==> Starting web display on port 6080..."
+pkill websockify 2>/dev/null || true
 websockify -D --web=/usr/share/novnc/ 6080 localhost:5900 2>/dev/null || true
+
+# 6. Configure modern CPU instructions (fixes Ubuntu 24.04 kernel panic)
+CPU_FLAGS="-cpu max"
+if [ -e /dev/kvm ] && [ -r /dev/kvm ] && [ -w /dev/kvm ]; then
+    CPU_FLAGS="-enable-kvm -cpu host"
+    echo "==> Hardware KVM acceleration enabled!"
+else
+    echo "==> Emulating modern x86_64-v3 CPU with -cpu max..."
+fi
 
 echo "=========================================================="
 echo "  ${EDITION^^} ISO IS NOW BOOTING!"
 echo "  Click the 'Open in Browser' pop-up in Codespaces (Port 6080)"
 echo "=========================================================="
 
-# 6. Launch QEMU with VNC display
+# 7. Launch QEMU virtual machine with modern CPU support
 qemu-system-x86_64 \
+    ${CPU_FLAGS} \
     -m "${RAM_ALLOC}" \
     -smp 2 \
     -vga virtio \

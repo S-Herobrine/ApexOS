@@ -83,7 +83,11 @@ apt-get update
 apt-get install -y --no-install-recommends \
     linux-generic \
     casper \
+    user-setup \
     systemd-sysv \
+    systemd \
+    dbus \
+    libpam-systemd \
     network-manager \
     locales \
     sudo \
@@ -100,15 +104,38 @@ apt-get install -y --no-install-recommends \
     calamares \
     zenity
 
-# Configure locale
+# Initialize machine-id (critical: prevents systemd PID 1 exit failure)
+systemd-machine-id-setup
+touch /etc/machine-id
+
+# Configure default locale and hostname
 locale-gen en_US.UTF-8
 update-locale LANG=en_US.UTF-8
+echo "apexos" > /etc/hostname
+
+# Pre-create live user 'apex' with password 'apex' and sudo rights
+if ! id -u apex &>/dev/null; then
+    useradd -m -s /bin/bash -G sudo,adm,audio,video,plugdev,netdev apex
+    echo "apex:apex" | chpasswd
+    echo "root:apexos" | chpasswd
+    echo "apex ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/apex
+    chmod 0440 /etc/sudoers.d/apex
+fi
+
+# Configure GDM3 autologin for live session
+mkdir -p /etc/gdm3
+cat << 'GDM_EOF' > /etc/gdm3/custom.conf
+[daemon]
+AutomaticLoginEnable=true
+AutomaticLogin=apex
+WaylandEnable=true
+GDM_EOF
 
 # Enable zram
 systemctl enable zramswap.service || true
 
-# Set hostname
-echo "apexos" > /etc/hostname
+# Update initramfs with casper live hooks
+update-initramfs -u -k all
 
 # Clean APT caches to keep image small
 apt-get autoremove -y
@@ -123,7 +150,6 @@ mkdir -p "${BUILD_DIR}/usr/share/themes/ApexOS-Dark"
 mkdir -p "${BUILD_DIR}/usr/share/themes/ApexOS-Light"
 mkdir -p "${BUILD_DIR}/usr/local/bin"
 
-# Copy wallpapers and branding
 if [ -d "${WORKSPACE_ROOT}/themes/wallpapers" ]; then
     cp -r "${WORKSPACE_ROOT}/themes/wallpapers/"* "${BUILD_DIR}/usr/share/backgrounds/apexos/" 2>/dev/null || true
 fi
@@ -134,7 +160,6 @@ if [ -d "${WORKSPACE_ROOT}/themes/gtk-4.0" ]; then
     cp -r "${WORKSPACE_ROOT}/themes/gtk-4.0" "${BUILD_DIR}/usr/share/themes/ApexOS-Dark/" 2>/dev/null || true
 fi
 
-# Copy helper scripts
 if [ -d "${WORKSPACE_ROOT}/scripts" ]; then
     cp "${WORKSPACE_ROOT}/scripts/"*.sh "${BUILD_DIR}/usr/local/bin/" 2>/dev/null || true
     cp "${WORKSPACE_ROOT}/scripts/"*.py "${BUILD_DIR}/usr/local/bin/" 2>/dev/null || true
@@ -149,7 +174,6 @@ cp "${VMLINUZ}" "${ISO_DIR}/casper/vmlinuz"
 cp "${INITRD}" "${ISO_DIR}/casper/initrd"
 
 # 6. CRITICAL: Unmount ALL virtual filesystems BEFORE mksquashfs!
-# (Prevents compressing 128TB virtual /proc/kcore and hanging)
 unmount_chroot
 trap - EXIT
 
@@ -162,7 +186,7 @@ mksquashfs "${BUILD_DIR}" "${ISO_DIR}/casper/filesystem.squashfs" \
     -comp zstd -Xcompression-level 3 -noappend \
     -e proc sys dev run tmp mnt media
 
-# 7. Create GRUB2 Boot Configuration for UEFI & BIOS
+# 7. Create GRUB2 Boot Configuration with 'rw' mode for read-write overlay
 echo "==> [Stage 7/7] Packaging Bootable Hybrid ISO image..."
 
 cat << 'EOF' > "${ISO_DIR}/boot/grub/grub.cfg"
@@ -178,18 +202,18 @@ fi
 
 menuentry "Start ApexOS 1.0 (Low-End Edition - 4GB RAM)" {
     set gfxpayload=keep
-    linux /casper/vmlinuz boot=casper username=apex hostname=apexos quiet splash ---
+    linux /casper/vmlinuz boot=casper username=apex hostname=apexos rw systemd.show_status=1 ---
     initrd /casper/initrd
 }
 
 menuentry "Start ApexOS 1.0 (Safe Graphics Mode)" {
     set gfxpayload=keep
-    linux /casper/vmlinuz boot=casper username=apex hostname=apexos nomodeset quiet splash ---
+    linux /casper/vmlinuz boot=casper username=apex hostname=apexos rw nomodeset systemd.show_status=1 ---
     initrd /casper/initrd
 }
 
 menuentry "Check Media for Defects" {
-    linux /casper/vmlinuz boot=casper checkfs quiet splash ---
+    linux /casper/vmlinuz boot=casper checkfs ---
     initrd /casper/initrd
 }
 EOF
@@ -208,6 +232,6 @@ xorriso -as mkisofs \
 rm -rf "${WORK_DIR}"
 
 echo "======================================================================"
-echo "  SUCCESS! ApexOS Low-End ISO generated in under 15 minutes."
+echo "  SUCCESS! ApexOS Low-End ISO generated."
 echo "  ISO Path: ${OUTPUT_DIR}/${ISO_NAME}"
 echo "======================================================================"

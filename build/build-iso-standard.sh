@@ -67,7 +67,11 @@ apt-get update
 apt-get install -y --no-install-recommends \
     linux-generic \
     casper \
+    user-setup \
     systemd-sysv \
+    systemd \
+    dbus \
+    libpam-systemd \
     network-manager \
     locales \
     sudo \
@@ -87,9 +91,33 @@ apt-get install -y --no-install-recommends \
     calamares \
     zenity
 
+# Initialize machine-id
+systemd-machine-id-setup
+touch /etc/machine-id
+
 locale-gen en_US.UTF-8
 update-locale LANG=en_US.UTF-8
 echo "apexos" > /etc/hostname
+
+# Pre-create live user 'apex' with password 'apex' and sudo
+if ! id -u apex &>/dev/null; then
+    useradd -m -s /bin/bash -G sudo,adm,audio,video,plugdev,netdev apex
+    echo "apex:apex" | chpasswd
+    echo "root:apexos" | chpasswd
+    echo "apex ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/apex
+    chmod 0440 /etc/sudoers.d/apex
+fi
+
+# Configure GDM3 autologin for live session
+mkdir -p /etc/gdm3
+cat << 'GDM_EOF' > /etc/gdm3/custom.conf
+[daemon]
+AutomaticLoginEnable=true
+AutomaticLogin=apex
+WaylandEnable=true
+GDM_EOF
+
+update-initramfs -u -k all
 
 apt-get autoremove -y
 apt-get clean
@@ -130,7 +158,7 @@ mksquashfs "${BUILD_DIR}" "${ISO_DIR}/casper/filesystem.squashfs" \
     -comp zstd -Xcompression-level 3 -noappend \
     -e proc sys dev run tmp mnt media
 
-# 7. Package ISO
+# 7. Package ISO with 'rw' live mode
 echo "==> [Stage 7/7] Generating bootable hybrid ISO..."
 cat << 'EOF' > "${ISO_DIR}/boot/grub/grub.cfg"
 set default="0"
@@ -138,13 +166,13 @@ set timeout=5
 
 menuentry "Start ApexOS 1.0 (Standard Edition)" {
     set gfxpayload=keep
-    linux /casper/vmlinuz boot=casper username=apex hostname=apexos quiet splash ---
+    linux /casper/vmlinuz boot=casper username=apex hostname=apexos rw systemd.show_status=1 ---
     initrd /casper/initrd
 }
 
 menuentry "Start ApexOS 1.0 (Safe Graphics Mode)" {
     set gfxpayload=keep
-    linux /casper/vmlinuz boot=casper username=apex hostname=apexos nomodeset quiet splash ---
+    linux /casper/vmlinuz boot=casper username=apex hostname=apexos rw nomodeset systemd.show_status=1 ---
     initrd /casper/initrd
 }
 EOF
