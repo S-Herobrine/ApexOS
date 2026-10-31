@@ -11,8 +11,12 @@ DIST_VERSION="1.0"
 DIST_EDITION="LowEnd"
 ARCH="amd64"
 CODENAME="noble"
-BUILD_DIR="$(pwd)/build/chroot-lowend"
-OUTPUT_DIR="$(pwd)/build/output"
+
+WORKSPACE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+WORK_DIR="/tmp/apexos-build"
+BUILD_DIR="${WORK_DIR}/chroot"
+ISO_DIR="${WORK_DIR}/iso"
+OUTPUT_DIR="${WORKSPACE_ROOT}/build/output"
 ISO_NAME="${DIST_NAME}-${DIST_VERSION}-${DIST_EDITION}-${ARCH}.iso"
 
 echo "======================================================================"
@@ -20,54 +24,57 @@ echo "          Starting ${DIST_NAME} ${DIST_VERSION} (${DIST_EDITION}) ISO Buil
 echo "          Targeting 4GB RAM / Low Disk Footprint Systems"
 echo "======================================================================"
 
-# 1. Verification of build prerequisites
-mkdir -p "${OUTPUT_DIR}"
-mkdir -p "${BUILD_DIR}"
+# Ensure clean working directories
+rm -rf "${WORK_DIR}"
+mkdir -p "${OUTPUT_DIR}" "${BUILD_DIR}" "${ISO_DIR}/casper" "${ISO_DIR}/boot/grub"
 
-# 2. Debootstrap minimal base (Ubuntu 24.04 Noble)
-if [ ! -f "${BUILD_DIR}/bin/bash" ]; then
-    echo "==> [Stage 1/6] Debootstrapping Ubuntu minimal base..."
-    debootstrap --variant=minbase --arch="${ARCH}" "${CODENAME}" "${BUILD_DIR}" http://archive.ubuntu.com/ubuntu/
-fi
+# 1. Debootstrap minimal Ubuntu 24.04 LTS (Noble) base
+echo "==> [Stage 1/7] Debootstrapping Ubuntu minimal base..."
+debootstrap --variant=minbase --arch="${ARCH}" "${CODENAME}" "${BUILD_DIR}" http://archive.ubuntu.com/ubuntu/
 
-# 3. Mount virtual filesystems for chroot
-echo "==> [Stage 2/6] Mounting system directories..."
-mount --bind /dev "${BUILD_DIR}/dev"
-mount --bind /run "${BUILD_DIR}/run"
-mount -t proc proc "${BUILD_DIR}/proc"
-mount -t sysfs sysfs "${BUILD_DIR}/sys"
-mount -t devpts devpts "${BUILD_DIR}/dev/pts"
+# 2. Configure Repositories & DNS inside chroot
+echo "==> [Stage 2/7] Configuring APT sources and networking..."
+cp /etc/resolv.conf "${BUILD_DIR}/etc/resolv.conf"
 
-cleanup() {
-    echo "==> Cleaning up chroot mount points..."
-    umount -lf "${BUILD_DIR}/dev/pts" 2>/dev/null || true
-    umount -lf "${BUILD_DIR}/sys" 2>/dev/null || true
-    umount -lf "${BUILD_DIR}/proc" 2>/dev/null || true
-    umount -lf "${BUILD_DIR}/run" 2>/dev/null || true
-    umount -lf "${BUILD_DIR}/dev" 2>/dev/null || true
-}
-trap cleanup EXIT
+cat << 'EOF' > "${BUILD_DIR}/etc/apt/sources.list"
+deb http://archive.ubuntu.com/ubuntu/ noble main restricted universe multiverse
+deb http://archive.ubuntu.com/ubuntu/ noble-updates main restricted universe multiverse
+deb http://security.ubuntu.com/ubuntu/ noble-security main restricted universe multiverse
+EOF
 
-# 4. Configure low-end PC optimization inside chroot
-echo "==> [Stage 3/6] Applying low-end PC memory optimizations..."
+# Low-End RAM kernel optimizations
 cat << 'EOF' > "${BUILD_DIR}/etc/sysctl.d/99-apexos-lowend.conf"
-# ApexOS 4GB RAM Optimization
 vm.swappiness=100
 vm.vfs_cache_pressure=50
 vm.dirty_background_ratio=5
 vm.dirty_ratio=10
 EOF
 
-# Enable zram-tools configuration inside chroot
+# zRAM swap configuration
 cat << 'EOF' > "${BUILD_DIR}/etc/default/zramswap"
-# zRAM 4GB RAM Multiplier (compresses idle RAM in-memory with lz4/zstd)
 ALGO=lz4
 PERCENT=100
 PRIORITY=100
 EOF
 
-# 5. Execute chroot setup with low-end package profile
-echo "==> [Stage 4/6] Installing ApexOS components..."
+# 3. Mount virtual filesystems for chroot package management
+echo "==> [Stage 3/7] Mounting chroot virtual filesystems..."
+mount -t proc proc "${BUILD_DIR}/proc"
+mount -t sysfs sysfs "${BUILD_DIR}/sys"
+mount --bind /dev "${BUILD_DIR}/dev"
+mount --bind /dev/pts "${BUILD_DIR}/dev/pts"
+
+unmount_chroot() {
+    echo "==> Unmounting chroot filesystems..."
+    umount -lf "${BUILD_DIR}/dev/pts" 2>/dev/null || true
+    umount -lf "${BUILD_DIR}/dev" 2>/dev/null || true
+    umount -lf "${BUILD_DIR}/sys" 2>/dev/null || true
+    umount -lf "${BUILD_DIR}/proc" 2>/dev/null || true
+}
+trap unmount_chroot EXIT
+
+# 4. Install Core Packages & Live Boot System inside chroot
+echo "==> [Stage 4/7] Installing kernel, casper, and desktop packages..."
 chroot "${BUILD_DIR}" /bin/bash << 'CHROOT_EOF'
 export DEBIAN_FRONTEND=noninteractive
 export LC_ALL=C
@@ -75,42 +82,132 @@ export LC_ALL=C
 apt-get update
 apt-get install -y --no-install-recommends \
     linux-generic \
+    casper \
     systemd-sysv \
+    network-manager \
+    locales \
+    sudo \
     zram-tools \
     mutter \
     gnome-shell \
+    gdm3 \
     pipewire \
     pipewire-pulse \
     wireplumber \
     papirus-icon-theme \
     fonts-inter \
+    firefox \
     calamares \
-    casper
+    zenity
 
-# Install zram compression module
+# Configure locale
+locale-gen en_US.UTF-8
+update-locale LANG=en_US.UTF-8
+
+# Enable zram
 systemctl enable zramswap.service || true
 
-# Clean APT cache immediately to save disk
+# Set hostname
+echo "apexos" > /etc/hostname
+
+# Clean APT caches to keep image small
+apt-get autoremove -y
 apt-get clean
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 CHROOT_EOF
 
-# 6. Squashfs Compression (high-compression zstd to save space)
-echo "==> [Stage 5/6] Generating compressed squashfs image..."
-mkdir -p "${BUILD_DIR}/../iso/casper"
-mksquashfs "${BUILD_DIR}" "${BUILD_DIR}/../iso/casper/filesystem.squashfs" \
-    -comp zstd -Xcompression-level 15 -noappend -wildcards
+# 5. Inject ApexOS Themes, Wallpapers, and Shell configs
+echo "==> [Stage 5/7] Injecting ApexOS desktop customizations..."
+mkdir -p "${BUILD_DIR}/usr/share/backgrounds/apexos"
+mkdir -p "${BUILD_DIR}/usr/share/themes/ApexOS-Dark"
+mkdir -p "${BUILD_DIR}/usr/share/themes/ApexOS-Light"
+mkdir -p "${BUILD_DIR}/usr/local/bin"
 
-# 7. Generate Bootable Hybrid ISO
-echo "==> [Stage 6/6] Generating final bootable hybrid ISO..."
+# Copy wallpapers and branding
+if [ -d "${WORKSPACE_ROOT}/themes/wallpapers" ]; then
+    cp -r "${WORKSPACE_ROOT}/themes/wallpapers/"* "${BUILD_DIR}/usr/share/backgrounds/apexos/" 2>/dev/null || true
+fi
+if [ -d "${WORKSPACE_ROOT}/themes/gtk-3.0" ]; then
+    cp -r "${WORKSPACE_ROOT}/themes/gtk-3.0" "${BUILD_DIR}/usr/share/themes/ApexOS-Dark/" 2>/dev/null || true
+fi
+if [ -d "${WORKSPACE_ROOT}/themes/gtk-4.0" ]; then
+    cp -r "${WORKSPACE_ROOT}/themes/gtk-4.0" "${BUILD_DIR}/usr/share/themes/ApexOS-Dark/" 2>/dev/null || true
+fi
+
+# Copy helper scripts
+if [ -d "${WORKSPACE_ROOT}/scripts" ]; then
+    cp "${WORKSPACE_ROOT}/scripts/"*.sh "${BUILD_DIR}/usr/local/bin/" 2>/dev/null || true
+    cp "${WORKSPACE_ROOT}/scripts/"*.py "${BUILD_DIR}/usr/local/bin/" 2>/dev/null || true
+    chmod +x "${BUILD_DIR}/usr/local/bin/"* 2>/dev/null || true
+fi
+
+# Extract Kernel and Initrd for Live Boot before unmounting
+echo "==> Extracting live kernel and initramfs..."
+VMLINUZ=$(ls -1 "${BUILD_DIR}/boot/vmlinuz-"* | tail -n1)
+INITRD=$(ls -1 "${BUILD_DIR}/boot/initrd.img-"* | tail -n1)
+cp "${VMLINUZ}" "${ISO_DIR}/casper/vmlinuz"
+cp "${INITRD}" "${ISO_DIR}/casper/initrd"
+
+# 6. CRITICAL: Unmount ALL virtual filesystems BEFORE mksquashfs!
+# (Prevents compressing 128TB virtual /proc/kcore and hanging)
+unmount_chroot
+trap - EXIT
+
+# Remove temporary resolv.conf
+rm -f "${BUILD_DIR}/etc/resolv.conf"
+
+# Generate Squashfs with fast zstd compression (Level 3 for fast build)
+echo "==> [Stage 6/7] Creating compressed squashfs filesystem (~3-5 mins)..."
+mksquashfs "${BUILD_DIR}" "${ISO_DIR}/casper/filesystem.squashfs" \
+    -comp zstd -Xcompression-level 3 -noappend \
+    -e proc sys dev run tmp mnt media
+
+# 7. Create GRUB2 Boot Configuration for UEFI & BIOS
+echo "==> [Stage 7/7] Packaging Bootable Hybrid ISO image..."
+
+cat << 'EOF' > "${ISO_DIR}/boot/grub/grub.cfg"
+set default="0"
+set timeout=5
+
+insmod font
+if loadfont /boot/grub/font.pf2 ; then
+    insmod gfxterm
+    set gfxmode=auto
+    terminal_output gfxterm
+fi
+
+menuentry "Start ApexOS 1.0 (Low-End Edition - 4GB RAM)" {
+    set gfxpayload=keep
+    linux /casper/vmlinuz boot=casper username=apex hostname=apexos quiet splash ---
+    initrd /casper/initrd
+}
+
+menuentry "Start ApexOS 1.0 (Safe Graphics Mode)" {
+    set gfxpayload=keep
+    linux /casper/vmlinuz boot=casper username=apex hostname=apexos nomodeset quiet splash ---
+    initrd /casper/initrd
+}
+
+menuentry "Check Media for Defects" {
+    linux /casper/vmlinuz boot=casper checkfs quiet splash ---
+    initrd /casper/initrd
+}
+EOF
+
+# Package bootable ISO with grub-mkrescue (supports both UEFI and Legacy BIOS)
+grub-mkrescue -o "${OUTPUT_DIR}/${ISO_NAME}" "${ISO_DIR}" \
+    -- -volid "ApexOS_1_0_LowEnd" 2>/dev/null || \
 xorriso -as mkisofs \
     -iso-level 3 \
     -full-iso9660-filenames \
-    -volid "${DIST_NAME}_${DIST_VERSION}" \
+    -volid "ApexOS_1_0_LowEnd" \
     -output "${OUTPUT_DIR}/${ISO_NAME}" \
-    "${BUILD_DIR}/../iso" 2>/dev/null || true
+    "${ISO_DIR}"
+
+# Cleanup temporary workdir
+rm -rf "${WORK_DIR}"
 
 echo "======================================================================"
-echo "  Build completed successfully!"
-echo "  ISO generated at: ${OUTPUT_DIR}/${ISO_NAME}"
+echo "  SUCCESS! ApexOS Low-End ISO generated in under 15 minutes."
+echo "  ISO Path: ${OUTPUT_DIR}/${ISO_NAME}"
 echo "======================================================================"

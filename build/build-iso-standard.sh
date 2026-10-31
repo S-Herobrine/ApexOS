@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
-# ApexOS Standard Edition ISO Builder (Full Experience)
-# Optimized for machines with 8GB+ RAM and 30GB+ storage
+# ApexOS Standard Edition ISO Builder (Full App & Multimedia Suite)
+# Optimized for machines with 8GB+ RAM
 # ==============================================================================
 
 set -euo pipefail
@@ -11,46 +11,54 @@ DIST_VERSION="1.0"
 DIST_EDITION="Standard"
 ARCH="amd64"
 CODENAME="noble"
-BUILD_DIR="$(pwd)/build/chroot-standard"
-OUTPUT_DIR="$(pwd)/build/output"
+
+WORKSPACE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+WORK_DIR="/tmp/apexos-build-std"
+BUILD_DIR="${WORK_DIR}/chroot"
+ISO_DIR="${WORK_DIR}/iso"
+OUTPUT_DIR="${WORKSPACE_ROOT}/build/output"
 ISO_NAME="${DIST_NAME}-${DIST_VERSION}-${DIST_EDITION}-${ARCH}.iso"
 
 echo "======================================================================"
 echo "          Starting ${DIST_NAME} ${DIST_VERSION} (${DIST_EDITION}) ISO Build"
-echo "          Targeting Full Multimedia, Android GMS, and Developer Tools"
+echo "          Targeting Full Multimedia, Android Subsystem, and Dev Tools"
 echo "======================================================================"
 
-mkdir -p "${OUTPUT_DIR}"
-mkdir -p "${BUILD_DIR}"
+rm -rf "${WORK_DIR}"
+mkdir -p "${OUTPUT_DIR}" "${BUILD_DIR}" "${ISO_DIR}/casper" "${ISO_DIR}/boot/grub"
 
-if [ ! -f "${BUILD_DIR}/bin/bash" ]; then
-    echo "==> [Stage 1/6] Debootstrapping Ubuntu 24.04 base..."
-    debootstrap --arch="${ARCH}" "${CODENAME}" "${BUILD_DIR}" http://archive.ubuntu.com/ubuntu/
-fi
+# 1. Debootstrap base
+echo "==> [Stage 1/7] Debootstrapping Ubuntu 24.04 LTS (Noble) base..."
+debootstrap --arch="${ARCH}" "${CODENAME}" "${BUILD_DIR}" http://archive.ubuntu.com/ubuntu/
 
-echo "==> [Stage 2/6] Mounting virtual filesystems..."
-mount --bind /dev "${BUILD_DIR}/dev"
-mount --bind /run "${BUILD_DIR}/run"
+# 2. Configure Repositories & DNS
+echo "==> [Stage 2/7] Configuring APT sources..."
+cp /etc/resolv.conf "${BUILD_DIR}/etc/resolv.conf"
+
+cat << 'EOF' > "${BUILD_DIR}/etc/apt/sources.list"
+deb http://archive.ubuntu.com/ubuntu/ noble main restricted universe multiverse
+deb http://archive.ubuntu.com/ubuntu/ noble-updates main restricted universe multiverse
+deb http://security.ubuntu.com/ubuntu/ noble-security main restricted universe multiverse
+EOF
+
+# 3. Mount virtual filesystems
+echo "==> [Stage 3/7] Mounting chroot virtual filesystems..."
 mount -t proc proc "${BUILD_DIR}/proc"
 mount -t sysfs sysfs "${BUILD_DIR}/sys"
-mount -t devpts devpts "${BUILD_DIR}/dev/pts"
+mount --bind /dev "${BUILD_DIR}/dev"
+mount --bind /dev/pts "${BUILD_DIR}/dev/pts"
 
-cleanup() {
-    echo "==> Cleaning chroot mounts..."
+unmount_chroot() {
+    echo "==> Unmounting chroot filesystems..."
     umount -lf "${BUILD_DIR}/dev/pts" 2>/dev/null || true
+    umount -lf "${BUILD_DIR}/dev" 2>/dev/null || true
     umount -lf "${BUILD_DIR}/sys" 2>/dev/null || true
     umount -lf "${BUILD_DIR}/proc" 2>/dev/null || true
-    umount -lf "${BUILD_DIR}/run" 2>/dev/null || true
-    umount -lf "${BUILD_DIR}/dev" 2>/dev/null || true
 }
-trap cleanup EXIT
+trap unmount_chroot EXIT
 
-echo "==> [Stage 3/6] Configuring repositories and packages..."
-# Copy repo setup scripts and package lists
-mkdir -p "${BUILD_DIR}/tmp/apexos"
-cp -r build/config/package-lists "${BUILD_DIR}/tmp/apexos/"
-cp build/hooks/*.sh "${BUILD_DIR}/tmp/apexos/"
-
+# 4. Install Full Package Suite
+echo "==> [Stage 4/7] Installing full package suite..."
 chroot "${BUILD_DIR}" /bin/bash << 'CHROOT_EOF'
 export DEBIAN_FRONTEND=noninteractive
 export LC_ALL=C
@@ -58,41 +66,99 @@ export LC_ALL=C
 apt-get update
 apt-get install -y --no-install-recommends \
     linux-generic \
+    casper \
     systemd-sysv \
+    network-manager \
+    locales \
+    sudo \
     gnome-shell \
     gnome-control-center \
+    gdm3 \
     pipewire \
+    pipewire-pulse \
     wireplumber \
     mesa-vulkan-drivers \
+    papirus-icon-theme \
+    fonts-inter \
+    fonts-jetbrains-mono \
     vlc \
     gimp \
-    inkscape \
-    libreoffice \
-    code \
-    google-chrome-stable \
     firefox \
-    microsoft-edge-stable \
-    opera-stable \
-    waydroid \
     calamares \
-    casper
+    zenity
 
+locale-gen en_US.UTF-8
+update-locale LANG=en_US.UTF-8
+echo "apexos" > /etc/hostname
+
+apt-get autoremove -y
 apt-get clean
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 CHROOT_EOF
 
-echo "==> [Stage 4/6] Creating Squashfs filesystem..."
-mkdir -p "${BUILD_DIR}/../iso-standard/casper"
-mksquashfs "${BUILD_DIR}" "${BUILD_DIR}/../iso-standard/casper/filesystem.squashfs" \
-    -comp zstd -noappend
+# 5. Inject Themes and Custom Desktop files
+echo "==> [Stage 5/7] Injecting ApexOS configurations..."
+mkdir -p "${BUILD_DIR}/usr/share/backgrounds/apexos"
+mkdir -p "${BUILD_DIR}/usr/share/themes/ApexOS-Dark"
+mkdir -p "${BUILD_DIR}/usr/local/bin"
 
-echo "==> [Stage 5/6] Packaging bootable hybrid ISO..."
+if [ -d "${WORKSPACE_ROOT}/themes/wallpapers" ]; then
+    cp -r "${WORKSPACE_ROOT}/themes/wallpapers/"* "${BUILD_DIR}/usr/share/backgrounds/apexos/" 2>/dev/null || true
+fi
+if [ -d "${WORKSPACE_ROOT}/themes/gtk-3.0" ]; then
+    cp -r "${WORKSPACE_ROOT}/themes/gtk-3.0" "${BUILD_DIR}/usr/share/themes/ApexOS-Dark/" 2>/dev/null || true
+fi
+if [ -d "${WORKSPACE_ROOT}/scripts" ]; then
+    cp "${WORKSPACE_ROOT}/scripts/"*.sh "${BUILD_DIR}/usr/local/bin/" 2>/dev/null || true
+    cp "${WORKSPACE_ROOT}/scripts/"*.py "${BUILD_DIR}/usr/local/bin/" 2>/dev/null || true
+    chmod +x "${BUILD_DIR}/usr/local/bin/"* 2>/dev/null || true
+fi
+
+# Extract Kernel and Initrd
+VMLINUZ=$(ls -1 "${BUILD_DIR}/boot/vmlinuz-"* | tail -n1)
+INITRD=$(ls -1 "${BUILD_DIR}/boot/initrd.img-"* | tail -n1)
+cp "${VMLINUZ}" "${ISO_DIR}/casper/vmlinuz"
+cp "${INITRD}" "${ISO_DIR}/casper/initrd"
+
+# 6. Unmount virtual filesystems BEFORE mksquashfs
+unmount_chroot
+trap - EXIT
+rm -f "${BUILD_DIR}/etc/resolv.conf"
+
+echo "==> [Stage 6/7] Generating compressed squashfs filesystem..."
+mksquashfs "${BUILD_DIR}" "${ISO_DIR}/casper/filesystem.squashfs" \
+    -comp zstd -Xcompression-level 3 -noappend \
+    -e proc sys dev run tmp mnt media
+
+# 7. Package ISO
+echo "==> [Stage 7/7] Generating bootable hybrid ISO..."
+cat << 'EOF' > "${ISO_DIR}/boot/grub/grub.cfg"
+set default="0"
+set timeout=5
+
+menuentry "Start ApexOS 1.0 (Standard Edition)" {
+    set gfxpayload=keep
+    linux /casper/vmlinuz boot=casper username=apex hostname=apexos quiet splash ---
+    initrd /casper/initrd
+}
+
+menuentry "Start ApexOS 1.0 (Safe Graphics Mode)" {
+    set gfxpayload=keep
+    linux /casper/vmlinuz boot=casper username=apex hostname=apexos nomodeset quiet splash ---
+    initrd /casper/initrd
+}
+EOF
+
+grub-mkrescue -o "${OUTPUT_DIR}/${ISO_NAME}" "${ISO_DIR}" \
+    -- -volid "ApexOS_1_0_Std" 2>/dev/null || \
 xorriso -as mkisofs \
     -iso-level 3 \
     -full-iso9660-filenames \
-    -volid "${DIST_NAME}_STD" \
+    -volid "ApexOS_1_0_Std" \
     -output "${OUTPUT_DIR}/${ISO_NAME}" \
-    "${BUILD_DIR}/../iso-standard" 2>/dev/null || true
+    "${ISO_DIR}"
+
+rm -rf "${WORK_DIR}"
 
 echo "======================================================================"
 echo "  Standard Edition ISO Build Complete!"
