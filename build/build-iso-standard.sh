@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # ApexOS Standard Edition ISO Builder (Full App & Multimedia Suite)
-# Optimized for machines with 8GB+ RAM
+# Optimized for reliable Live Boot on Physical PCs & Virtual Machines (QEMU/KVM)
 # ==============================================================================
 
 set -euo pipefail
@@ -25,14 +25,14 @@ echo "          Targeting Full Multimedia, Android Subsystem, and Dev Tools"
 echo "======================================================================"
 
 rm -rf "${WORK_DIR}"
-mkdir -p "${OUTPUT_DIR}" "${BUILD_DIR}" "${ISO_DIR}/casper" "${ISO_DIR}/boot/grub"
+mkdir -p "${OUTPUT_DIR}" "${BUILD_DIR}" "${ISO_DIR}/casper" "${ISO_DIR}/boot/grub" "${ISO_DIR}/.disk"
 
-# 1. Debootstrap base
-echo "==> [Stage 1/7] Debootstrapping Ubuntu 24.04 LTS (Noble) base..."
+# 1. Debootstrap base Ubuntu 24.04 LTS (Noble)
+echo "==> [Stage 1/8] Debootstrapping Ubuntu 24.04 LTS (Noble) base..."
 debootstrap --arch="${ARCH}" "${CODENAME}" "${BUILD_DIR}" http://archive.ubuntu.com/ubuntu/
 
-# 2. Configure Repositories & DNS
-echo "==> [Stage 2/7] Configuring APT sources..."
+# 2. Configure Repositories & DNS inside chroot
+echo "==> [Stage 2/8] Configuring APT sources and networking..."
 cp /etc/resolv.conf "${BUILD_DIR}/etc/resolv.conf"
 
 cat << 'EOF' > "${BUILD_DIR}/etc/apt/sources.list"
@@ -41,8 +41,8 @@ deb http://archive.ubuntu.com/ubuntu/ noble-updates main restricted universe mul
 deb http://security.ubuntu.com/ubuntu/ noble-security main restricted universe multiverse
 EOF
 
-# 3. Mount virtual filesystems
-echo "==> [Stage 3/7] Mounting chroot virtual filesystems..."
+# 3. Mount virtual filesystems for chroot operations
+echo "==> [Stage 3/8] Mounting chroot virtual filesystems..."
 mount -t proc proc "${BUILD_DIR}/proc"
 mount -t sysfs sysfs "${BUILD_DIR}/sys"
 mount --bind /dev "${BUILD_DIR}/dev"
@@ -57,8 +57,8 @@ unmount_chroot() {
 }
 trap unmount_chroot EXIT
 
-# 4. Install Full Package Suite
-echo "==> [Stage 4/7] Installing full package suite..."
+# 4. Install Full Package Suite & Live Boot Subsystems
+echo "==> [Stage 4/8] Installing kernel, casper, desktop and display packages..."
 chroot "${BUILD_DIR}" /bin/bash << 'CHROOT_EOF'
 export DEBIAN_FRONTEND=noninteractive
 export LC_ALL=C
@@ -68,13 +68,23 @@ apt-get install -y --no-install-recommends \
     linux-generic \
     casper \
     user-setup \
+    discover \
+    laptop-detect \
+    os-prober \
     systemd-sysv \
     systemd \
     dbus \
+    dbus-x11 \
     libpam-systemd \
+    polkitd \
+    accountsservice \
     network-manager \
     locales \
     sudo \
+    xorg \
+    xserver-xorg-video-all \
+    xserver-xorg-input-all \
+    gnome-session \
     gnome-shell \
     gnome-control-center \
     gdm3 \
@@ -91,41 +101,58 @@ apt-get install -y --no-install-recommends \
     calamares \
     zenity
 
-# Initialize machine-id
+# 1. Initialize machine-id (critical: prevents systemd PID 1 exit failure)
 systemd-machine-id-setup
-touch /etc/machine-id
+dbus-uuidgen --ensure=/etc/machine-id
 
+# 2. Configure default locale and hostname
 locale-gen en_US.UTF-8
 update-locale LANG=en_US.UTF-8
 echo "apexos" > /etc/hostname
 
-# Pre-create live user 'apex' with password 'apex' and sudo
+# 3. Pre-create live user 'apex' with password 'apex' and passwordless sudo
 if ! id -u apex &>/dev/null; then
-    useradd -m -s /bin/bash -G sudo,adm,audio,video,plugdev,netdev apex
+    useradd -m -s /bin/bash -G sudo,adm,audio,video,plugdev,netdev,cdrom,dip apex
     echo "apex:apex" | chpasswd
     echo "root:apexos" | chpasswd
+    mkdir -p /etc/sudoers.d
     echo "apex ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/apex
     chmod 0440 /etc/sudoers.d/apex
 fi
 
-# Configure GDM3 autologin for live session
+# 4. Configure GDM3 autologin with X11 fallback (prevents Wayland black-screen in QEMU/VMs)
 mkdir -p /etc/gdm3
 cat << 'GDM_EOF' > /etc/gdm3/custom.conf
 [daemon]
 AutomaticLoginEnable=true
 AutomaticLogin=apex
-WaylandEnable=true
+TimedLoginEnable=true
+TimedLogin=apex
+TimedLoginDelay=0
+WaylandEnable=false
 GDM_EOF
 
+# 5. Ensure initramfs contains all drivers for Live Boot & storage devices
+cat << 'MOD_EOF' >> /etc/initramfs-tools/modules
+overlay
+squashfs
+isofs
+loop
+virtio_pci
+virtio_blk
+MOD_EOF
+
+# Re-build initramfs with all casper and storage hooks
 update-initramfs -u -k all
 
+# Clean APT caches to keep image size compact
 apt-get autoremove -y
 apt-get clean
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 CHROOT_EOF
 
-# 5. Inject Themes and Custom Desktop files
-echo "==> [Stage 5/7] Injecting ApexOS configurations..."
+# 5. Inject ApexOS Themes, Wallpapers, and Shell configs
+echo "==> [Stage 5/8] Injecting ApexOS configurations..."
 mkdir -p "${BUILD_DIR}/usr/share/backgrounds/apexos"
 mkdir -p "${BUILD_DIR}/usr/share/themes/ApexOS-Dark"
 mkdir -p "${BUILD_DIR}/usr/local/bin"
@@ -142,41 +169,61 @@ if [ -d "${WORKSPACE_ROOT}/scripts" ]; then
     chmod +x "${BUILD_DIR}/usr/local/bin/"* 2>/dev/null || true
 fi
 
-# Extract Kernel and Initrd
+# Extract Live Kernel and Initrd before unmounting
+echo "==> Extracting live kernel and initramfs..."
 VMLINUZ=$(ls -1 "${BUILD_DIR}/boot/vmlinuz-"* | tail -n1)
 INITRD=$(ls -1 "${BUILD_DIR}/boot/initrd.img-"* | tail -n1)
 cp "${VMLINUZ}" "${ISO_DIR}/casper/vmlinuz"
 cp "${INITRD}" "${ISO_DIR}/casper/initrd"
 
-# 6. Unmount virtual filesystems BEFORE mksquashfs
+# 6. Unmount virtual filesystems BEFORE mksquashfs!
 unmount_chroot
 trap - EXIT
 rm -f "${BUILD_DIR}/etc/resolv.conf"
 
-echo "==> [Stage 6/7] Generating compressed squashfs filesystem..."
+# 7. Write Casper identification files (.disk/info, filesystem.size)
+echo "==> [Stage 6/8] Writing Casper Live CD identification markers..."
+echo "ApexOS 1.0 (Noble Numbat) - Release amd64" > "${ISO_DIR}/.disk/info"
+touch "${ISO_DIR}/.disk/base_installable"
+echo "full_cd/single" > "${ISO_DIR}/.disk/cd_type"
+
+# Write filesystem uncompressed size for casper overlay RAM calculation
+printf $(du -sx --block-size=1 "${BUILD_DIR}" | cut -f1) > "${ISO_DIR}/casper/filesystem.size"
+
+# Generate compressed squashfs
+echo "==> [Stage 7/8] Generating compressed squashfs filesystem (~3-5 mins)..."
 mksquashfs "${BUILD_DIR}" "${ISO_DIR}/casper/filesystem.squashfs" \
     -comp zstd -Xcompression-level 3 -noappend \
     -e proc sys dev run tmp mnt media
 
-# 7. Package ISO with 'rw' live mode
-echo "==> [Stage 7/7] Generating bootable hybrid ISO..."
+# 8. Create GRUB2 Boot Configuration with robust live flags
+echo "==> [Stage 8/8] Packaging bootable hybrid ISO..."
+
 cat << 'EOF' > "${ISO_DIR}/boot/grub/grub.cfg"
 set default="0"
-set timeout=5
+set timeout=3
+
+insmod font
+if loadfont /boot/grub/font.pf2 ; then
+    insmod gfxterm
+    set gfxmode=auto
+    terminal_output gfxterm
+fi
 
 menuentry "Start ApexOS 1.0 (Standard Edition)" {
     set gfxpayload=keep
-    linux /casper/vmlinuz boot=casper username=apex hostname=apexos rw systemd.show_status=1 ---
+    linux /casper/vmlinuz boot=casper username=apex hostname=apexos rw ignore_uuid noprompt systemd.show_status=1 ---
     initrd /casper/initrd
 }
 
-menuentry "Start ApexOS 1.0 (Safe Graphics Mode)" {
+menuentry "Start ApexOS 1.0 (Safe Graphics / Compatibility Mode)" {
     set gfxpayload=keep
-    linux /casper/vmlinuz boot=casper username=apex hostname=apexos rw nomodeset systemd.show_status=1 ---
+    linux /casper/vmlinuz boot=casper username=apex hostname=apexos rw ignore_uuid nomodeset noprompt systemd.show_status=1 ---
     initrd /casper/initrd
 }
 EOF
 
+# Package bootable ISO with grub-mkrescue (supports both UEFI and Legacy BIOS)
 grub-mkrescue -o "${OUTPUT_DIR}/${ISO_NAME}" "${ISO_DIR}" \
     -- -volid "ApexOS_1_0_Std" 2>/dev/null || \
 xorriso -as mkisofs \

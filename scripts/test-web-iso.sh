@@ -91,12 +91,13 @@ echo "  APEXOS ${EDITION^^} IS NOW BOOTING!"
 echo "  Open Port 6080 in your browser to view the screen."
 echo "=========================================================="
 
-# 9. Launch QEMU virtual machine
+# 9. Launch QEMU with smooth mouse pointer (-device usb-tablet) and standard VGA
 qemu-system-x86_64 \
     ${CPU_FLAGS} \
     -m "${RAM_ALLOC}" \
     -smp 2 \
-    -vga virtio \
+    -vga std \
+    -device usb-tablet \
     -vnc :0 \
     -cdrom "${ISO_PATH}" \
     -hda /tmp/apexos-test-disk.qcow2 \
