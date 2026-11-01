@@ -114,16 +114,47 @@ apt-get install -y --no-install-recommends \
     calamares \
     zenity
 
-# Initialize machine-id (critical: prevents systemd PID 1 exit failure)
+# 1. Configure initramfs-tools explicitly for Casper Live Boot and generic hardware
+mkdir -p /etc/initramfs-tools
+touch /etc/initramfs-tools/initramfs.conf
+grep -q '^BOOT=' /etc/initramfs-tools/initramfs.conf && sed -i 's/^BOOT=.*/BOOT=casper/' /etc/initramfs-tools/initramfs.conf || echo 'BOOT=casper' >> /etc/initramfs-tools/initramfs.conf
+grep -q '^MODULES=' /etc/initramfs-tools/initramfs.conf && sed -i 's/^MODULES=.*/MODULES=most/' /etc/initramfs-tools/initramfs.conf || echo 'MODULES=most' >> /etc/initramfs-tools/initramfs.conf
+
+# Configure casper user & host identity
+mkdir -p /etc/casper.conf.d
+cat << 'CASPER_EOF' > /etc/casper.conf
+export USERNAME="apex"
+export USERFULLNAME="ApexOS User"
+export HOST="apexos"
+export BUILD_SYSTEM="Ubuntu"
+export FLAVOUR="ApexOS"
+CASPER_EOF
+
+# 2. Add all storage, CD-ROM, and virtualization drivers to initramfs
+cat << 'MOD_EOF' >> /etc/initramfs-tools/modules
+sr_mod
+cdrom
+ata_piix
+ahci
+sd_mod
+virtio_blk
+virtio_pci
+overlay
+squashfs
+isofs
+loop
+MOD_EOF
+
+# 3. Initialize machine-id (critical: prevents systemd PID 1 exit failure)
 systemd-machine-id-setup
 dbus-uuidgen --ensure=/etc/machine-id
 
-# Configure default locale and hostname
+# 4. Configure default locale and hostname
 locale-gen en_US.UTF-8
 update-locale LANG=en_US.UTF-8
 echo "apexos" > /etc/hostname
 
-# Pre-create live user 'apex' with password 'apex' and passwordless sudo
+# 5. Pre-create live user 'apex' with password 'apex' and passwordless sudo
 if ! id -u apex &>/dev/null; then
     useradd -m -s /bin/bash -G sudo,adm,audio,video,plugdev,netdev,cdrom,dip apex
     echo "apex:apex" | chpasswd
@@ -133,7 +164,7 @@ if ! id -u apex &>/dev/null; then
     chmod 0440 /etc/sudoers.d/apex
 fi
 
-# Configure GDM3 autologin with X11 fallback (prevents Wayland black-screen in QEMU/VMs)
+# 6. Configure GDM3 autologin with X11 fallback (prevents Wayland black-screen in QEMU/VMs)
 mkdir -p /etc/gdm3
 cat << 'GDM_EOF' > /etc/gdm3/custom.conf
 [daemon]
@@ -148,17 +179,7 @@ GDM_EOF
 # Enable zram
 systemctl enable zramswap.service || true
 
-# Ensure initramfs contains all drivers for Live Boot & storage devices
-cat << 'MOD_EOF' >> /etc/initramfs-tools/modules
-overlay
-squashfs
-isofs
-loop
-virtio_pci
-virtio_blk
-MOD_EOF
-
-# Update initramfs with casper live hooks
+# 7. Update initramfs with casper live hooks
 update-initramfs -u -k all
 
 # Clean APT caches to keep image small
@@ -217,7 +238,7 @@ mksquashfs "${BUILD_DIR}" "${ISO_DIR}/casper/filesystem.squashfs" \
     -comp zstd -Xcompression-level 3 -noappend \
     -e proc sys dev run tmp mnt media
 
-# 8. Create GRUB2 Boot Configuration with robust live flags
+# 8. Create GRUB2 Boot Configuration with serial console logging
 echo "==> [Stage 8/8] Packaging Bootable Hybrid ISO image..."
 
 cat << 'EOF' > "${ISO_DIR}/boot/grub/grub.cfg"
@@ -233,13 +254,13 @@ fi
 
 menuentry "Start ApexOS 1.0 (Low-End Edition - 4GB RAM)" {
     set gfxpayload=keep
-    linux /casper/vmlinuz boot=casper username=apex hostname=apexos rw ignore_uuid noprompt systemd.show_status=1 ---
+    linux /casper/vmlinuz boot=casper username=apex hostname=apexos rw ignore_uuid noprompt console=tty0 console=ttyS0 systemd.show_status=1 ---
     initrd /casper/initrd
 }
 
 menuentry "Start ApexOS 1.0 (Safe Graphics / Compatibility Mode)" {
     set gfxpayload=keep
-    linux /casper/vmlinuz boot=casper username=apex hostname=apexos rw ignore_uuid nomodeset noprompt systemd.show_status=1 ---
+    linux /casper/vmlinuz boot=casper username=apex hostname=apexos rw ignore_uuid nomodeset noprompt console=tty0 console=ttyS0 systemd.show_status=1 ---
     initrd /casper/initrd
 }
 EOF

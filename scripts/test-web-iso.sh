@@ -47,8 +47,16 @@ rm -rf "/tmp/iso-download/${EDITION}"
 mkdir -p "/tmp/iso-download/${EDITION}"
 
 # 3. Fetch latest built ISO from GitHub Actions
-echo "==> Downloading latest ${ARTIFACT_NAME} from GitHub Actions..."
-gh run download -R S-Herobrine/ApexOS --name "${ARTIFACT_NAME}" --dir "/tmp/iso-download/${EDITION}"
+echo "==> Finding latest successful build for ${ARTIFACT_NAME}..."
+RUN_ID=$(gh run list -R S-Herobrine/ApexOS -w "Build Bootable ISOs" -s success -L 1 --json databaseId --jq '.[0].databaseId' 2>/dev/null || true)
+
+if [ -n "${RUN_ID}" ]; then
+    echo "==> Downloading artifact from successful run #${RUN_ID}..."
+    gh run download "${RUN_ID}" -R S-Herobrine/ApexOS --name "${ARTIFACT_NAME}" --dir "/tmp/iso-download/${EDITION}"
+else
+    echo "==> Downloading artifact from latest run..."
+    gh run download -R S-Herobrine/ApexOS --name "${ARTIFACT_NAME}" --dir "/tmp/iso-download/${EDITION}"
+fi
 
 ISO_PATH=$(find "/tmp/iso-download/${EDITION}" -name "*.iso" | head -n1)
 
@@ -86,16 +94,18 @@ qemu-img create -f qcow2 /tmp/apexos-virtual-drive.qcow2 10G
 echo "=========================================================="
 echo "  APEXOS ${EDITION^^} IS STARTING!"
 echo "  Open Port 6080 in your browser to view the screen."
+echo "  Boot log will stream in the terminal below."
 echo "=========================================================="
 
-# 8. Launch QEMU with proper USB controller (-usb) and safe memory allocation
-qemu-system-x86_64 \
+# 8. Launch QEMU with serial console logging directly into terminal
+exec qemu-system-x86_64 \
     ${CPU_FLAGS} \
     -m 2048 \
     -smp 2 \
     -vga std \
     -usb \
     -device usb-tablet \
+    -serial mon:stdio \
     -vnc 127.0.0.1:0 \
     -cdrom "${ISO_PATH}" \
     -hda /tmp/apexos-virtual-drive.qcow2 \
