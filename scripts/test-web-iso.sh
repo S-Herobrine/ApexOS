@@ -10,7 +10,6 @@ echo "=========================================================="
 echo "    ApexOS Cloud ISO Browser Runner (Zero Local Download)"
 echo "=========================================================="
 
-# 1. Ask which ISO to test if not passed as an argument
 EDITION="${1:-}"
 
 if [ -z "$EDITION" ]; then
@@ -28,30 +27,27 @@ fi
 if [ "$EDITION" = "standard" ] || [ "$EDITION" = "1" ]; then
     ARTIFACT_NAME="ApexOS-1.0-Standard-amd64-iso"
     ISO_PATTERN="*Standard*.iso"
-    RAM_ALLOC=4096
     EDITION="standard"
     echo "==> Selected: ApexOS Standard Edition"
 else
     ARTIFACT_NAME="ApexOS-1.0-LowEnd-amd64-iso"
     ISO_PATTERN="*LowEnd*.iso"
-    RAM_ALLOC=3072
     EDITION="lowend"
     echo "==> Selected: ApexOS Low-End Edition"
 fi
 
-# 2. Install QEMU and noVNC web viewer
+# 1. Install QEMU and noVNC web viewer
 sudo apt-get update -qq
 sudo apt-get install -y -qq qemu-system-x86 novnc websockify curl gh
 
 sudo ln -sf /usr/share/novnc/vnc.html /usr/share/novnc/index.html 2>/dev/null || true
 
-# 3. Clean any old cached ISOs from /tmp so we always run the newest build
-echo "==> Cleaning old cached ISOs..."
+# 2. Clean old downloaded ISOs to ensure latest build is fetched
 rm -rf "/tmp/iso-download/${EDITION}"
 mkdir -p "/tmp/iso-download/${EDITION}"
 
-# 4. Fetch the latest successfully built ISO from GitHub Actions
-echo "==> Fetching latest ${ARTIFACT_NAME} from GitHub Actions..."
+# 3. Fetch latest built ISO from GitHub Actions
+echo "==> Downloading latest ${ARTIFACT_NAME} from GitHub Actions..."
 gh run download -R S-Herobrine/ApexOS --name "${ARTIFACT_NAME}" --dir "/tmp/iso-download/${EDITION}"
 
 ISO_PATH=$(find "/tmp/iso-download/${EDITION}" -name "*.iso" | head -n1)
@@ -64,20 +60,17 @@ fi
 echo "==> Successfully downloaded: ${ISO_PATH}"
 ls -lh "${ISO_PATH}"
 
-# 5. Create a 10GB virtual hard drive for testing the installation
-qemu-img create -f qcow2 /tmp/apexos-test-disk.qcow2 10G 2>/dev/null || true
-
-# 6. Kill any existing instances on ports 6080 and 5900
+# 4. Clean up any existing instances on ports 6080 and 5900
 sudo fuser -k 6080/tcp 5900/tcp 2>/dev/null || true
-pkill -f websockify 2>/dev/null || true
-pkill -f qemu-system-x86 2>/dev/null || true
+pkill -9 -f websockify 2>/dev/null || true
+pkill -9 -f qemu-system-x86 2>/dev/null || true
 sleep 1
 
-# 7. Start noVNC web server on port 6080
-echo "==> Starting web display on port 6080..."
-websockify -D --web=/usr/share/novnc/ 6080 localhost:5900
+# 5. Start noVNC web bridge with explicit IPv4 binding (127.0.0.1:5900)
+echo "==> Starting web display bridge on port 6080..."
+websockify -D --web=/usr/share/novnc/ 6080 127.0.0.1:5900
 
-# 8. Check CPU virtualization support
+# 6. Check CPU virtualization support
 CPU_FLAGS="-cpu max"
 if [ -e /dev/kvm ] && [ -r /dev/kvm ] && [ -w /dev/kvm ]; then
     CPU_FLAGS="-enable-kvm -cpu host"
@@ -86,19 +79,24 @@ else
     echo "==> Emulating modern x86_64 CPU with -cpu max..."
 fi
 
+# 7. Create virtual drive for installer testing
+rm -f /tmp/apexos-virtual-drive.qcow2
+qemu-img create -f qcow2 /tmp/apexos-virtual-drive.qcow2 10G
+
 echo "=========================================================="
-echo "  APEXOS ${EDITION^^} IS NOW BOOTING!"
+echo "  APEXOS ${EDITION^^} IS STARTING!"
 echo "  Open Port 6080 in your browser to view the screen."
 echo "=========================================================="
 
-# 9. Launch QEMU with smooth mouse pointer (-device usb-tablet) and standard VGA
-qemu-system-x86_64 \
+# 8. Launch QEMU with safe 2048MB memory allocation (prevents Codespaces OOM crash)
+# Explicit 127.0.0.1:0 ensures matching IPv4 VNC port
+exec qemu-system-x86_64 \
     ${CPU_FLAGS} \
-    -m "${RAM_ALLOC}" \
+    -m 2048 \
     -smp 2 \
     -vga std \
     -device usb-tablet \
-    -vnc :0 \
+    -vnc 127.0.0.1:0 \
     -cdrom "${ISO_PATH}" \
-    -hda /tmp/apexos-test-disk.qcow2 \
+    -hda /tmp/apexos-virtual-drive.qcow2 \
     -boot d
