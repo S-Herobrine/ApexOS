@@ -88,13 +88,13 @@ echo "  APEXOS ${EDITION^^} IS STARTING!"
 echo "  Open Port 6080 in your browser to view the screen."
 echo "=========================================================="
 
-# 8. Launch QEMU with safe 2048MB memory allocation (prevents Codespaces OOM crash)
-# Explicit 127.0.0.1:0 ensures matching IPv4 VNC port
-exec qemu-system-x86_64 \
+# 8. Launch QEMU with proper USB controller (-usb) and safe memory allocation
+qemu-system-x86_64 \
     ${CPU_FLAGS} \
     -m 2048 \
     -smp 2 \
     -vga std \
+    -usb \
     -device usb-tablet \
     -vnc 127.0.0.1:0 \
     -cdrom "${ISO_PATH}" \
