@@ -104,6 +104,18 @@ apt-get install -y --no-install-recommends \
     mutter \
     gnome-session \
     gnome-shell \
+    gnome-settings-daemon \
+    libgl1-mesa-dri \
+    mesa-utils \
+    gnome-terminal \
+    nautilus \
+    xdg-user-dirs \
+    xdg-utils \
+    dconf-cli \
+    dconf-gsettings-backend \
+    gsettings-desktop-schemas \
+    adwaita-icon-theme \
+    x11-xserver-utils \
     gdm3 \
     pipewire \
     pipewire-pulse \
@@ -174,7 +186,41 @@ TimedLoginEnable=true
 TimedLogin=apex
 TimedLoginDelay=0
 WaylandEnable=false
+DefaultSession=gnome-xorg.desktop
 GDM_EOF
+
+# Set default session for user apex in AccountsService
+mkdir -p /var/lib/AccountsService/users
+cat << 'ACC_EOF' > /var/lib/AccountsService/users/apex
+[User]
+Session=gnome-xorg
+XSession=gnome-xorg
+SystemAccount=false
+ACC_EOF
+chmod 0600 /var/lib/AccountsService/users/apex
+
+# Mask GNOME session failed screen so minor startup hiccups never trigger the white screen
+systemctl --global mask gnome-session-failed.service 2>/dev/null || true
+
+# Set ApexOS dark theme & papirus icons in dconf
+mkdir -p /etc/dconf/db/local.d /etc/dconf/profile
+echo -e "user-db:user\nsystem-db:local" > /etc/dconf/profile/user
+cat << 'DCONF_EOF' > /etc/dconf/db/local.d/01-apexos
+[org/gnome/desktop/interface]
+gtk-theme='ApexOS-Dark'
+icon-theme='Papirus-Dark'
+color-scheme='prefer-dark'
+
+[org/gnome/desktop/background]
+picture-uri='file:///usr/share/backgrounds/apexos/apexos-default-purple.png'
+picture-uri-dark='file:///usr/share/backgrounds/apexos/apexos-default-purple.png'
+picture-options='zoom'
+
+[org/gnome/desktop/wm/preferences]
+theme='ApexOS-Dark'
+button-layout='appmenu:minimize,maximize,close'
+DCONF_EOF
+dconf update 2>/dev/null || true
 
 # Enable zram
 systemctl enable zramswap.service || true
