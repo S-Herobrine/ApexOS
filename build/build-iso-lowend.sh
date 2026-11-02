@@ -223,6 +223,30 @@ unmount_chroot
 trap - EXIT
 rm -f "${BUILD_DIR}/etc/resolv.conf"
 
+# Ensure all essential root mountpoints and directories exist in the rootfs
+mkdir -p "${BUILD_DIR}/proc" \
+         "${BUILD_DIR}/sys" \
+         "${BUILD_DIR}/dev" \
+         "${BUILD_DIR}/run" \
+         "${BUILD_DIR}/tmp" \
+         "${BUILD_DIR}/mnt" \
+         "${BUILD_DIR}/media" \
+         "${BUILD_DIR}/var/crash" \
+         "${BUILD_DIR}/var/log"
+chmod 1777 "${BUILD_DIR}/tmp"
+chmod 755 "${BUILD_DIR}/proc" "${BUILD_DIR}/sys" "${BUILD_DIR}/dev" "${BUILD_DIR}/run"
+
+# Create essential static device nodes if missing (critical for early initramfs & switch_root)
+if [ ! -e "${BUILD_DIR}/dev/console" ]; then
+    mknod -m 600 "${BUILD_DIR}/dev/console" c 5 1 2>/dev/null || true
+fi
+if [ ! -e "${BUILD_DIR}/dev/null" ]; then
+    mknod -m 666 "${BUILD_DIR}/dev/null" c 1 3 2>/dev/null || true
+fi
+if [ ! -e "${BUILD_DIR}/dev/zero" ]; then
+    mknod -m 666 "${BUILD_DIR}/dev/zero" c 1 5 2>/dev/null || true
+fi
+
 # 7. Write Casper identification files (.disk/info, filesystem.size)
 echo "==> [Stage 6/8] Writing Casper Live CD identification markers..."
 echo "ApexOS 1.0 (Noble Numbat) - Release amd64" > "${ISO_DIR}/.disk/info"
@@ -235,8 +259,7 @@ printf $(du -sx --block-size=1 "${BUILD_DIR}" | cut -f1) > "${ISO_DIR}/casper/fi
 # Generate Squashfs with fast zstd compression (Level 3 for fast build)
 echo "==> [Stage 7/8] Creating compressed squashfs filesystem (~3-5 mins)..."
 mksquashfs "${BUILD_DIR}" "${ISO_DIR}/casper/filesystem.squashfs" \
-    -comp zstd -Xcompression-level 3 -noappend \
-    -e proc sys dev run tmp mnt media
+    -comp zstd -Xcompression-level 3 -noappend
 
 # 8. Create GRUB2 Boot Configuration with serial console logging
 echo "==> [Stage 8/8] Packaging Bootable Hybrid ISO image..."
