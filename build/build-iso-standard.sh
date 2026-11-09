@@ -85,6 +85,7 @@ apt-get install -y --no-install-recommends \
     xserver-xorg-video-all \
     xserver-xorg-input-all \
     gnome-session \
+    gnome-session-xsession \
     gnome-shell \
     gnome-settings-daemon \
     mutter \
@@ -154,15 +155,58 @@ locale-gen en_US.UTF-8
 update-locale LANG=en_US.UTF-8
 echo "apexos" > /etc/hostname
 
-# 5. Pre-create live user 'apex' with password 'apex' and passwordless sudo
+# 5. Pre-create live user 'apex' with password 'apex', nopasswdlogin, and passwordless sudo
+groupadd -r nopasswdlogin 2>/dev/null || true
 if ! id -u apex &>/dev/null; then
-    useradd -m -s /bin/bash -G sudo,adm,audio,video,plugdev,netdev,cdrom,dip apex
+    useradd -m -s /bin/bash -G sudo,adm,audio,video,plugdev,netdev,cdrom,dip,nopasswdlogin apex
     echo "apex:apex" | chpasswd
     echo "root:apexos" | chpasswd
     mkdir -p /etc/sudoers.d
     echo "apex ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/apex
     chmod 0440 /etc/sudoers.d/apex
+else
+    usermod -aG nopasswdlogin,sudo,adm,audio,video,plugdev,netdev,cdrom,dip apex
 fi
+
+mkdir -p /home/apex/.config /home/apex/Desktop
+chown -R apex:apex /home/apex
+
+# Ensure PAM permits instant autologin for live session
+if [ -f /etc/pam.d/gdm-autologin ]; then
+    sed -i '1s/^/auth sufficient pam_permit.so\n/' /etc/pam.d/gdm-autologin
+fi
+
+# Ensure Xorg wrapper has full rights
+mkdir -p /etc/X11
+cat << 'XWRAP_EOF' > /etc/X11/Xwrapper.config
+allowed_users=anybody
+needs_root_rights=yes
+XWRAP_EOF
+
+# Ensure xsessions descriptors exist for all aliases
+mkdir -p /usr/share/xsessions
+cat << 'XSESSION_EOF' > /usr/share/xsessions/gnome-xorg.desktop
+[Desktop Entry]
+Name=ApexOS (GNOME on Xorg)
+Comment=This session logs you into ApexOS
+Exec=gnome-session
+TryExec=gnome-shell
+Type=Application
+DesktopNames=GNOME
+X-GDM-SessionRegisters=true
+XSESSION_EOF
+
+ln -sf /usr/share/xsessions/gnome-xorg.desktop /usr/share/xsessions/gnome.desktop 2>/dev/null || true
+ln -sf /usr/share/xsessions/gnome-xorg.desktop /usr/share/xsessions/ubuntu.desktop 2>/dev/null || true
+ln -sf /usr/share/xsessions/gnome-xorg.desktop /usr/share/xsessions/ubuntu-xorg.desktop 2>/dev/null || true
+
+# User .xsession fallback
+cat << 'XSESSION_USER' > /home/apex/.xsession
+#!/bin/sh
+exec gnome-session
+XSESSION_USER
+chmod +x /home/apex/.xsession
+chown apex:apex /home/apex/.xsession
 
 # 6. Configure GDM3 autologin with X11 fallback (prevents Wayland black-screen in QEMU/VMs)
 mkdir -p /etc/gdm3
@@ -190,7 +234,7 @@ chmod 0600 /var/lib/AccountsService/users/apex
 # Mask GNOME session failed screen so minor startup hiccups never trigger the white screen
 systemctl --global mask gnome-session-failed.service 2>/dev/null || true
 
-# Set ApexOS dark theme & papirus icons in dconf
+# Set ApexOS dark theme, wallpaper, and disable screen blanking
 mkdir -p /etc/dconf/db/local.d /etc/dconf/profile
 echo -e "user-db:user\nsystem-db:local" > /etc/dconf/profile/user
 cat << 'DCONF_EOF' > /etc/dconf/db/local.d/01-apexos
@@ -207,6 +251,15 @@ picture-options='zoom'
 [org/gnome/desktop/wm/preferences]
 theme='ApexOS-Dark'
 button-layout='appmenu:minimize,maximize,close'
+
+[org/gnome/desktop/session]
+idle-delay=uint32 0
+
+[org/gnome/desktop/screensaver]
+lock-enabled=false
+
+[org/gnome/shell]
+enabled-extensions=['satasos-shell@satasos.org']
 DCONF_EOF
 dconf update 2>/dev/null || true
 
@@ -235,6 +288,23 @@ if [ -d "${WORKSPACE_ROOT}/scripts" ]; then
     cp "${WORKSPACE_ROOT}/scripts/"*.sh "${BUILD_DIR}/usr/local/bin/" 2>/dev/null || true
     cp "${WORKSPACE_ROOT}/scripts/"*.py "${BUILD_DIR}/usr/local/bin/" 2>/dev/null || true
     chmod +x "${BUILD_DIR}/usr/local/bin/"* 2>/dev/null || true
+fi
+
+# Inject GNOME Shell extension
+if [ -d "${WORKSPACE_ROOT}/desktop/shell/satasos-shell" ]; then
+    mkdir -p "${BUILD_DIR}/usr/share/gnome-shell/extensions/satasos-shell@satasos.org"
+    cp -r "${WORKSPACE_ROOT}/desktop/shell/satasos-shell/"* "${BUILD_DIR}/usr/share/gnome-shell/extensions/satasos-shell@satasos.org/" 2>/dev/null || true
+fi
+
+# Inject Desktop applications & icons
+mkdir -p "${BUILD_DIR}/usr/share/applications"
+if [ -d "${WORKSPACE_ROOT}/desktop/filemanager" ]; then
+    cp "${WORKSPACE_ROOT}/desktop/filemanager/"*.py "${BUILD_DIR}/usr/local/bin/" 2>/dev/null || true
+    cp "${WORKSPACE_ROOT}/desktop/filemanager/"*.desktop "${BUILD_DIR}/usr/share/applications/" 2>/dev/null || true
+fi
+if [ -d "${WORKSPACE_ROOT}/desktop/settings" ]; then
+    cp "${WORKSPACE_ROOT}/desktop/settings/"*.py "${BUILD_DIR}/usr/local/bin/" 2>/dev/null || true
+    cp "${WORKSPACE_ROOT}/desktop/settings/"*.desktop "${BUILD_DIR}/usr/share/applications/" 2>/dev/null || true
 fi
 
 # Extract Live Kernel and Initrd before unmounting
