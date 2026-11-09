@@ -41,7 +41,8 @@ jobs:
 
       - name: Build Low-End ISO (~15-20 mins)
         run: |
-          chmod +x build/build-iso-lowend.sh build/hooks/*.sh scripts/*.sh
+          sed -i 's/\r$//' build/*.sh scripts/*.sh 2>/dev/null || true
+          chmod +x build/build-iso-lowend.sh scripts/*.sh 2>/dev/null || true
           sudo bash build/build-iso-lowend.sh
 
       - name: Upload Low-End ISO Artifact
@@ -76,7 +77,8 @@ jobs:
 
       - name: Build Standard ISO (~25-35 mins)
         run: |
-          chmod +x build/build-iso-standard.sh build/hooks/*.sh scripts/*.sh
+          sed -i 's/\r$//' build/*.sh scripts/*.sh 2>/dev/null || true
+          chmod +x build/build-iso-standard.sh scripts/*.sh 2>/dev/null || true
           sudo bash build/build-iso-standard.sh
 
       - name: Upload Standard ISO Artifact

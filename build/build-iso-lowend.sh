@@ -168,16 +168,18 @@ update-locale LANG=en_US.UTF-8
 echo "apexos" > /etc/hostname
 
 # 5. Pre-create live user 'apex' with password 'apex', nopasswdlogin, and passwordless sudo
-groupadd -r nopasswdlogin 2>/dev/null || true
+for g in sudo adm audio video plugdev netdev cdrom dip nopasswdlogin; do
+    groupadd -f -r "$g" 2>/dev/null || true
+done
 if ! id -u apex &>/dev/null; then
-    useradd -m -s /bin/bash -G sudo,adm,audio,video,plugdev,netdev,cdrom,dip,nopasswdlogin apex
+    useradd -m -s /bin/bash -G sudo,adm,audio,video,plugdev,netdev,cdrom,dip,nopasswdlogin apex 2>/dev/null || useradd -m -s /bin/bash apex
     echo "apex:apex" | chpasswd
     echo "root:apexos" | chpasswd
     mkdir -p /etc/sudoers.d
     echo "apex ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/apex
     chmod 0440 /etc/sudoers.d/apex
 else
-    usermod -aG nopasswdlogin,sudo,adm,audio,video,plugdev,netdev,cdrom,dip apex
+    usermod -aG nopasswdlogin,sudo,adm,audio,video,plugdev,netdev,cdrom,dip apex 2>/dev/null || true
 fi
 
 mkdir -p /home/apex/.config /home/apex/Desktop
