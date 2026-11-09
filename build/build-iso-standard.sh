@@ -62,6 +62,7 @@ echo "==> [Stage 4/8] Installing kernel, casper, desktop and display packages...
 chroot "${BUILD_DIR}" /bin/bash << 'CHROOT_EOF'
 export DEBIAN_FRONTEND=noninteractive
 export LC_ALL=C
+set -euo pipefail
 
 apt-get update
 apt-get install -y --no-install-recommends \
@@ -85,7 +86,6 @@ apt-get install -y --no-install-recommends \
     xserver-xorg-video-all \
     xserver-xorg-input-all \
     gnome-session \
-    gnome-session-xsession \
     gnome-shell \
     gnome-settings-daemon \
     mutter \
