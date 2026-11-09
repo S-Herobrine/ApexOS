@@ -237,8 +237,9 @@ chmod 0600 /var/lib/AccountsService/users/apex
 systemctl --global mask gnome-session-failed.service 2>/dev/null || true
 
 # Set ApexOS dark theme, wallpaper, and disable screen blanking
-mkdir -p /etc/dconf/db/local.d /etc/dconf/profile
-echo -e "user-db:user\nsystem-db:local" > /etc/dconf/profile/user
+mkdir -p /etc/dconf/db/local.d
+mkdir -p /etc/dconf/profile
+printf "user-db:user\nsystem-db:local\n" > /etc/dconf/profile/user
 cat << 'DCONF_EOF' > /etc/dconf/db/local.d/01-apexos
 [org/gnome/desktop/interface]
 gtk-theme='ApexOS-Dark'

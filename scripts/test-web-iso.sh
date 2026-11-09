@@ -47,16 +47,12 @@ rm -rf "/tmp/iso-download/${EDITION}"
 mkdir -p "/tmp/iso-download/${EDITION}"
 
 # 3. Fetch latest built ISO from GitHub Actions
-echo "==> Finding latest successful build for ${ARTIFACT_NAME}..."
-RUN_ID=$(gh run list -R S-Herobrine/ApexOS -w "Build Bootable ISOs" -s success -L 1 --json databaseId --jq '.[0].databaseId' 2>/dev/null || true)
-
-if [ -n "${RUN_ID}" ]; then
-    echo "==> Downloading artifact from successful run #${RUN_ID}..."
+echo "==> Downloading latest ${ARTIFACT_NAME} from GitHub Actions..."
+gh run download -R S-Herobrine/ApexOS --name "${ARTIFACT_NAME}" --dir "/tmp/iso-download/${EDITION}" || {
+    echo "==> Downloading by latest run ID..."
+    RUN_ID=$(gh run list -R S-Herobrine/ApexOS -L 5 --json databaseId --jq '.[0].databaseId')
     gh run download "${RUN_ID}" -R S-Herobrine/ApexOS --name "${ARTIFACT_NAME}" --dir "/tmp/iso-download/${EDITION}"
-else
-    echo "==> Downloading artifact from latest run..."
-    gh run download -R S-Herobrine/ApexOS --name "${ARTIFACT_NAME}" --dir "/tmp/iso-download/${EDITION}"
-fi
+}
 
 ISO_PATH=$(find "/tmp/iso-download/${EDITION}" -name "*.iso" | head -n1)
 
