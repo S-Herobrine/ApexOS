@@ -101,6 +101,10 @@ apt-get install -y --no-install-recommends \
     gsettings-desktop-schemas \
     adwaita-icon-theme \
     x11-xserver-utils \
+    xinit \
+    lightdm \
+    lightdm-gtk-greeter \
+    libpam-gnome-keyring \
     gdm3 \
     pipewire \
     pipewire-pulse \
@@ -210,7 +214,22 @@ XSESSION_USER
 chmod +x /home/apex/.xsession
 chown apex:apex /home/apex/.xsession
 
-# 6. Configure GDM3 autologin with X11 fallback (prevents Wayland black-screen in QEMU/VMs)
+# 6. Configure LightDM (Primary Display Manager for instant live desktop autologin)
+mkdir -p /etc/lightdm/lightdm.conf.d
+cat << 'LIGHTDM_EOF' > /etc/lightdm/lightdm.conf
+[Seat:*]
+autologin-user=apex
+autologin-user-timeout=0
+user-session=gnome
+greeter-session=lightdm-gtk-greeter
+xserver-command=X -core -noreset
+LIGHTDM_EOF
+
+echo "/usr/sbin/lightdm" > /etc/X11/default-display-manager
+systemctl disable gdm3 2>/dev/null || true
+systemctl enable lightdm 2>/dev/null || true
+
+# GDM3 fallback configuration
 mkdir -p /etc/gdm3
 cat << 'GDM_EOF' > /etc/gdm3/custom.conf
 [daemon]
@@ -220,7 +239,7 @@ TimedLoginEnable=true
 TimedLogin=apex
 TimedLoginDelay=0
 WaylandEnable=false
-DefaultSession=gnome-xorg.desktop
+DefaultSession=gnome
 GDM_EOF
 
 # Set default session for user apex in AccountsService
